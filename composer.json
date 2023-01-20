@@ -1,0 +1,25 @@
+{
+    "name": "totoro1302/php-websocket-client",
+    "description": "Php Websocket Client",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Totoro1302\\PhpWebsocketClient\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Totoro1302"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=8.2",
+        "psr/log": "^3.0",
+        "psr/clock": "^1.0",
+        "symfony/clock": "^6.2",
+        "nyholm/psr7": "^1.5",
+        "psr/http-factory": "^1.0"
+    }
+}
