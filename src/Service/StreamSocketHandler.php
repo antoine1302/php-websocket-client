@@ -6,6 +6,7 @@ namespace Totoro1302\PhpWebsocketClient\Service;
 
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
+use Totoro1302\PhpWebsocketClient\Exception\StreamSocketConnectionException;
 
 class StreamSocketHandler
 {
@@ -18,7 +19,7 @@ class StreamSocketHandler
         $this->uriFactory = $uriFactory;
     }
 
-    public function initiate(string $originalUri, int $connectionTimeout, bool $isPersistent): bool
+    public function initiate(string $originalUri, int $connectionTimeout, bool $isPersistent): void
     {
         // Instanciate a connection uri from the original uri
         $uri = $this->uriFactory->createUri($originalUri);
@@ -42,13 +43,12 @@ class StreamSocketHandler
         );
 
         if ($this->resource === false || !is_resource($this->resource)) {
-            // Add log
-            return false;
+            $exception = new StreamSocketConnectionException('Unable to initiate socket connection');
+            // Add log here
+            throw $exception;
         }
 
         // Continue with the handshake
-
-        return true;
     }
 
     private static function createConnectionUri(UriInterface $uri): string
