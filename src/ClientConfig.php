@@ -6,6 +6,8 @@ namespace Totoro1302\PhpWebsocketClient;
 
 class ClientConfig implements ClientConfigInterface
 {
+    private const CONNECTION_TIMEOUT_DEFAULT = 5;
+    private const IS_PERSISTENT_DEFAULT = false;
     public function __construct(
         private readonly string $name,
         private readonly string $uri,
@@ -28,12 +30,12 @@ class ClientConfig implements ClientConfigInterface
 
     public function getConnectionTimeout(): ?int
     {
-        return $this->connectionTimeout;
+        return $this->connectionTimeout ?? self::CONNECTION_TIMEOUT_DEFAULT;
     }
 
     public function isPersistent(): ?bool
     {
-        return $this->isPersistent;
+        return $this->isPersistent ?? self::IS_PERSISTENT_DEFAULT;
     }
 
     public function getSubProtocols(): ?array
