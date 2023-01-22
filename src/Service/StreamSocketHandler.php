@@ -7,16 +7,25 @@ namespace Totoro1302\PhpWebsocketClient\Service;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 use Totoro1302\PhpWebsocketClient\Exception\StreamSocketConnectionException;
+use Totoro1302\PhpWebsocketClient\Service\Hansdshake\HeadersBuilder;
+use Totoro1302\PhpWebsocketClient\Service\Hansdshake\KeyGenerator;
 
 class StreamSocketHandler
 {
     private $resource;
     private bool $isPersistent = false;
     private UriFactoryInterface $uriFactory;
+    private KeyGenerator $keyGenerator;
+    private HeadersBuilder $headersBuilder;
 
-    public function __construct(UriFactoryInterface $uriFactory)
-    {
+    public function __construct(
+        UriFactoryInterface $uriFactory,
+        KeyGenerator $keyGenerator,
+        HeadersBuilder $headersBuilder
+    ) {
         $this->uriFactory = $uriFactory;
+        $this->keyGenerator = $keyGenerator;
+        $this->headersBuilder = $headersBuilder;
     }
 
     public function initiate(string $originalUri, int $connectionTimeout, bool $isPersistent): void
@@ -48,10 +57,29 @@ class StreamSocketHandler
             throw $exception;
         }
 
-        // Continue with the handshake
+        $handshakeKey = $this->keyGenerator->generate();
+
+        $handshakeHeaders = $this->headersBuilder->build($uri, $handshakeKey, null, null);
+
+        // Validate handshake
     }
 
-    private static function createConnectionUri(UriInterface $uri): string
+    public function write()
+    {
+    }
+    public function read()
+    {
+        $response = '';
+        while(feof($this->resource) === false){
+            $buffer = stream_get_line($this->resource, 1024, PHP_EOL);
+            if($buffer === false){
+                throw new StreamSocketConnectionException('Failed to read stream');
+            }
+            $response .= $buffer;
+        }
+    }
+
+    private function createConnectionUri(UriInterface $uri): string
     {
         [$scheme, $port] = $uri->getScheme() === 'wss' ? ['ssl', 443] : ['tcp', 80];
 
