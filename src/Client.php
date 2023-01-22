@@ -33,8 +33,10 @@ class Client implements LoggerAwareInterface
     public function connect(): void
     {
         $uri = $this->clientConfig->getUri();
+        $connectionTimeout = $this->clientConfig->getConnectionTimeout();
+        $isPersistent = $this->clientConfig->isPersistent();
 
-        $this->socketHandler->initiate($uri);
+        $this->socketHandler->initiate($uri, $connectionTimeout, $isPersistent);
 
     }
 
