@@ -10,6 +10,7 @@ class KeyValidator
 {
     private const HANDSHAKE_MAGIC_STRING = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
     private const WEBSOCKET_ACCEPT_HEADER = 'Sec-WebSocket-Accept';
+
     public function validate(string $websocketKey, string $responseHeaders): bool
     {
         $keyExpected = $this->getExpectedKey($websocketKey);
