@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Service\Hansdshake;
+
 use Psr\Http\Message\UriInterface;
 
 class HeadersBuilder
@@ -11,8 +12,10 @@ class HeadersBuilder
 
     public function build(UriInterface $uri, string $handshakeKey, ?array $subProtocols, ?string $origin): string
     {
+        $fullPath = $uri->getPath() ?: '/';
+        $fullPath .= $uri->getQuery();
 
-        $headers = sprintf(self::getHeaders(), $uri->getPath() ?: '/', $uri->getAuthority(), self::WEBSOCKET_VERSION, $handshakeKey);
+        $headers = sprintf(self::getHeaders(), $fullPath, $uri->getAuthority(), self::WEBSOCKET_VERSION, $handshakeKey);
 
         if (!empty($subProtocols)) {
             $headers .= PHP_EOL . self::addWebsocketSubProtocolHeader($subProtocols);
