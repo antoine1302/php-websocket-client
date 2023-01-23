@@ -9,6 +9,7 @@ use Psr\Http\Message\UriInterface;
 use Totoro1302\PhpWebsocketClient\Exception\StreamSocketConnectionException;
 use Totoro1302\PhpWebsocketClient\Service\Hansdshake\HeadersBuilder;
 use Totoro1302\PhpWebsocketClient\Service\Hansdshake\KeyGenerator;
+use Totoro1302\PhpWebsocketClient\Service\Hansdshake\KeyValidator;
 
 class StreamSocketHandler
 {
@@ -16,16 +17,19 @@ class StreamSocketHandler
     private bool $isPersistent = false;
     private UriFactoryInterface $uriFactory;
     private KeyGenerator $keyGenerator;
+    private KeyValidator $keyValidator;
     private HeadersBuilder $headersBuilder;
 
     public function __construct(
         UriFactoryInterface $uriFactory,
         KeyGenerator $keyGenerator,
+        KeyValidator $keyValidator,
         HeadersBuilder $headersBuilder
     )
     {
         $this->uriFactory = $uriFactory;
         $this->keyGenerator = $keyGenerator;
+        $this->keyValidator = $keyValidator;
         $this->headersBuilder = $headersBuilder;
     }
 
@@ -64,7 +68,11 @@ class StreamSocketHandler
 
         $handshakeHeaders = $this->headersBuilder->build($uri, $handshakeKey, null, null);
 
-        // Validate handshake
+        $this->write($handshakeHeaders);
+
+        $response = $this->read();
+
+        // Validate response headers
     }
 
     public function write(string $data, ?int $length = null): void
