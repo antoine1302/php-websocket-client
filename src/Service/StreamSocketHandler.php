@@ -22,7 +22,8 @@ class StreamSocketHandler
         UriFactoryInterface $uriFactory,
         KeyGenerator $keyGenerator,
         HeadersBuilder $headersBuilder
-    ) {
+    )
+    {
         $this->uriFactory = $uriFactory;
         $this->keyGenerator = $keyGenerator;
         $this->headersBuilder = $headersBuilder;
@@ -53,9 +54,11 @@ class StreamSocketHandler
 
         if ($this->resource === false || !is_resource($this->resource)) {
             $exception = new StreamSocketConnectionException('Unable to initiate socket connection');
-            // Add log here
+            // Add log error/warning here
             throw $exception;
         }
+
+        // Add log info here
 
         $handshakeKey = $this->keyGenerator->generate();
 
@@ -64,19 +67,18 @@ class StreamSocketHandler
         // Validate handshake
     }
 
-    public function write()
+    public function write(string $data, ?int $length = null): void
     {
+        stream_socket_sendto($this->resource, $data);
     }
-    public function read()
+
+    public function read(): string
     {
         $response = '';
-        while(feof($this->resource) === false){
-            $buffer = stream_get_line($this->resource, 1024, PHP_EOL);
-            if($buffer === false){
-                throw new StreamSocketConnectionException('Failed to read stream');
-            }
+        while (false !== $buffer = stream_socket_recvfrom($this->resource, 1024)) {
             $response .= $buffer;
         }
+        return $response;
     }
 
     private function createConnectionUri(UriInterface $uri): string
