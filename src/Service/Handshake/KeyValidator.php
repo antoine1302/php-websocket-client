@@ -14,7 +14,7 @@ class KeyValidator
     public function validate(string $websocketKey, string $responseHeaders): bool
     {
         $keyExpected = $this->getExpectedKey($websocketKey);
-        $keyAcceptHeader = $this->getKeyAcceptHeader($responseHeaders);
+        $keyAcceptHeader = $this->getKeyAcceptFromHeaders($responseHeaders);
 
         return $keyExpected === $keyAcceptHeader;
     }
@@ -24,7 +24,7 @@ class KeyValidator
         return base64_encode(sha1($websocketKey . self::HANDSHAKE_MAGIC_STRING, true));
     }
 
-    private function getKeyAcceptHeader(string $responseHeaders): string
+    private function getKeyAcceptFromHeaders(string $responseHeaders): string
     {
         $header = strtok($responseHeaders, PHP_EOL);
         while (false !== $header) {
