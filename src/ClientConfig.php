@@ -11,8 +11,8 @@ class ClientConfig implements ClientConfigInterface
     public function __construct(
         private readonly string $name,
         private readonly string $uri,
-        private readonly int $connectionTimeout,
-        private readonly bool $isPersistent,
+        private readonly ?int $connectionTimeout,
+        private readonly ?bool $isPersistent,
         private readonly ?array $subProtocols
     )
     {
