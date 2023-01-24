@@ -7,9 +7,7 @@ namespace Totoro1302\PhpWebsocketClient\Service;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 use Totoro1302\PhpWebsocketClient\Exception\StreamSocketConnectionException;
-use Totoro1302\PhpWebsocketClient\Service\Hansdshake\HeadersBuilder;
-use Totoro1302\PhpWebsocketClient\Service\Hansdshake\KeyGenerator;
-use Totoro1302\PhpWebsocketClient\Service\Hansdshake\KeyValidator;
+use Totoro1302\PhpWebsocketClient\Service\Hansdshake\{HeadersBuilder, KeyGenerator, KeyValidator};
 
 class StreamSocketHandler
 {
@@ -37,7 +35,47 @@ class StreamSocketHandler
     {
         // Instanciate a connection uri from the original uri
         $uri = $this->uriFactory->createUri($originalUri);
-        $connectionUri = self::createConnectionUri($uri);
+        $this->openSocketConnection($uri, $connectionTimeout, $isPersistent);
+
+        // Add log info socket connection open
+
+        $handshakeKey = $this->keyGenerator->generate();
+        $clientHandshakeHeaders = $this->headersBuilder->build($uri, $handshakeKey, null, null);
+
+        $this->write($clientHandshakeHeaders);
+        $serverHandshakeHeaders = $this->read();
+
+        if ($this->keyValidator->validate($handshakeKey, $serverHandshakeHeaders) === false) {
+            // Add log warning
+            throw new StreamSocketConnectionException('Cannot validate hadnshake key');
+        }
+
+        // Add log info socket handshake successful
+    }
+
+    public function write(string $data): void
+    {
+        $resultCode = stream_socket_sendto($this->resource, $data);
+
+        if ($resultCode === false) {
+            // Add log warning
+        }
+
+        // Add log debug level with resultCode
+    }
+
+    public function read(): string
+    {
+        $response = '';
+        while (false !== $buffer = stream_socket_recvfrom($this->resource, 1024)) {
+            $response .= $buffer;
+        }
+        return $response;
+    }
+
+    private function openSocketConnection(UriInterface $uri, int $connectionTimeout, bool $isPersistent): void
+    {
+        $connectionUri = $this->createConnectionUri($uri);
 
         // Add persistent flag
         $flags = STREAM_CLIENT_CONNECT;
@@ -61,32 +99,6 @@ class StreamSocketHandler
             // Add log error/warning here
             throw $exception;
         }
-
-        // Add log info here
-
-        $handshakeKey = $this->keyGenerator->generate();
-
-        $handshakeHeaders = $this->headersBuilder->build($uri, $handshakeKey, null, null);
-
-        $this->write($handshakeHeaders);
-
-        $response = $this->read();
-
-        // Validate response headers
-    }
-
-    public function write(string $data, ?int $length = null): void
-    {
-        stream_socket_sendto($this->resource, $data);
-    }
-
-    public function read(): string
-    {
-        $response = '';
-        while (false !== $buffer = stream_socket_recvfrom($this->resource, 1024)) {
-            $response .= $buffer;
-        }
-        return $response;
     }
 
     private function createConnectionUri(UriInterface $uri): string
