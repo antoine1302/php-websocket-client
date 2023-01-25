@@ -11,9 +11,10 @@ class ClientConfig implements ClientConfigInterface
     public function __construct(
         private readonly string $name,
         private readonly string $uri,
-        private readonly ?int $connectionTimeout,
-        private readonly ?bool $isPersistent,
-        private readonly ?array $subProtocols
+        private readonly ?int $connectionTimeout = null,
+        private readonly ?string $origin = null,
+        private readonly ?bool $isPersistent = null,
+        private readonly ?array $subProtocols = null
     )
     {
     }
@@ -31,6 +32,11 @@ class ClientConfig implements ClientConfigInterface
     public function getConnectionTimeout(): int
     {
         return $this->connectionTimeout ?? self::CONNECTION_TIMEOUT_DEFAULT;
+    }
+
+    public function getOrigin(): ?string
+    {
+        return $this->origin;
     }
 
     public function isPersistent(): bool
