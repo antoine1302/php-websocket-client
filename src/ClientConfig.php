@@ -15,9 +15,7 @@ class ClientConfig implements ClientConfigInterface
         private readonly ?string $origin = null,
         private readonly ?bool $isPersistent = null,
         private readonly ?array $subProtocols = null
-    )
-    {
-    }
+    ) {}
 
     public function getName(): string
     {
