@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Service\Hansdshake;
 
-use Totoro1302\PhpWebsocketClient\Exception\StreamSocketConnectionException;
+use Totoro1302\PhpWebsocketClient\Exception\WebSocketProtocolException;
 
 class KeyValidator
 {
@@ -34,6 +34,6 @@ class KeyValidator
             $header = strtok(PHP_EOL);
         }
 
-        throw new StreamSocketConnectionException("Cannot find header: Sec-WebSocket-Accept");
+        throw new WebSocketProtocolException("Cannot find header: Sec-WebSocket-Accept");
     }
 }

@@ -75,4 +75,8 @@ class Client implements LoggerAwareInterface
     {
         return true;
     }
+
+    public function pull(): void{}
+
+    public function push(): void{}
 }
