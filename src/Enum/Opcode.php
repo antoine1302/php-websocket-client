@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Enum;
 
-enum Opcode
+enum Opcode: int
 {
     case Continuation = 0x00;
     case Text = 0x01;
