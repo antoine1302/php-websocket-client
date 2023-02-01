@@ -39,10 +39,12 @@ class Deserializer
                 continue;
             }
 
+            if ($fragmentSize === FragmentSize::MaskingKey && $this->masked === false) {
+                continue;
+            }
 
-            $data = $this->pull($fragmentSize, $resource);
 
-
+            // $this->pull($fragmentSize, $resource);
         }
 
 
@@ -51,14 +53,11 @@ class Deserializer
 
     private function pull(FragmentSize $fragmentSize, $resource): string
     {
-
         $response = stream_socket_recvfrom($resource, $fragmentSize->value);
 
         if ($response === false) {
             throw new StreamSocketException('Cannot read from stream socket resource');
         }
-
-        return $response;
     }
 
     private function getDeserializeSequence(): array
@@ -70,5 +69,25 @@ class Deserializer
             FragmentSize::PayloadExtended64bit,
             FragmentSize::MaskingKey
         ];
+    }
+
+    private function getFinAndOpcode(string $data)
+    {
+    }
+
+    private function getMaskAndPayload(string $data)
+    {
+    }
+
+    private function getPayloadExtended16bit(string $data)
+    {
+    }
+
+    private function getPayloadExtended64bit(string $data)
+    {
+    }
+
+    private function getMaskingKey(string $data)
+    {
     }
 }
