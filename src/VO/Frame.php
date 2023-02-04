@@ -27,7 +27,8 @@ class Frame
         return $this->opcode;
     }
 
-    public function isMasked(): bool {
+    public function isMasked(): bool
+    {
         return $this->masked;
     }
 
