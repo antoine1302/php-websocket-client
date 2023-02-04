@@ -8,7 +8,9 @@ use FragmentBypassableAwareTrait;
 class PayloadExtended16bitFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLengthAwareInterface, FragmentBypassableAwareInterface
 {
     use FragmentBypassableAwareTrait;
+
     private const LENGTH = 2;
+    private const PAYLOAD_VALUE = 126;
     private int $value = 0;
     private \Closure $callback;
 
@@ -31,6 +33,6 @@ class PayloadExtended16bitFragmentHandler implements FragmentUnpackableAwareInte
 
     protected function getBypassCallbackArgs()
     {
-        return $this->value;
+        return self::PAYLOAD_VALUE;
     }
 }

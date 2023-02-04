@@ -11,8 +11,9 @@ class PayloadExtended64bitFragmentHandler implements FragmentUnpackableAwareInte
     use FragmentBypassableAwareTrait;
 
     private const LENGTH = 8;
+    private const PAYLOAD_VALUE = 127;
     private int $value = 0;
-    
+
     public function unpack(string $binary): void
     {
         [$byte] = array_values(unpack('n', $binary));
@@ -32,6 +33,6 @@ class PayloadExtended64bitFragmentHandler implements FragmentUnpackableAwareInte
 
     protected function getBypassCallbackArgs()
     {
-        return $this->value;
+        return self::PAYLOAD_VALUE;
     }
 }
