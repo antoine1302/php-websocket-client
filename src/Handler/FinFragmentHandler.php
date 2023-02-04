@@ -9,13 +9,13 @@ class FinFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLe
     private const BITMASK = 0x80;
     private const LENGTH = 1;
     private ?bool $value;
+    
     public function unpack(string $binaryData): void
     {
         [$byte] = array_values(unpack('C', $binaryData));
 
         $this->value = ($byte & self::BITMASK) === self::BITMASK;
     }
-
 
     public function getLength(): int
     {

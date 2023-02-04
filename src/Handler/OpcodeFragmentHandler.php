@@ -7,7 +7,7 @@ namespace Totoro1302\PhpWebsocketClient\Handler;
 use Totoro1302\PhpWebsocketClient\Enum\Opcode;
 use Totoro1302\PhpWebsocketClient\Exception\WebSocketProtocolException;
 
-class OpcodeFragmentHandler
+class OpcodeFragmentHandler implements FragmentUnpackableAwareInterface
 {
     private const BITMASK = 0x0F;
     private Opcode $value;
