@@ -5,34 +5,57 @@ declare(strict_types=1);
 namespace Totoro1302\PhpWebsocketClient\Service\Frame;
 
 use Totoro1302\PhpWebsocketClient\Enum\FragmentSize;
-use Totoro1302\PhpWebsocketClient\Enum\Opcode;
-use Totoro1302\PhpWebsocketClient\Enum\PayloadLength;
 use Totoro1302\PhpWebsocketClient\Exception\StreamSocketException;
+use Totoro1302\PhpWebsocketClient\Exception\WebSocketProtocolException;
+use Totoro1302\PhpWebsocketClient\Handler\FragmentBypassableAwareInterface;
+use Totoro1302\PhpWebsocketClient\Handler\FragmentLengthAwareInterface;
+use Totoro1302\PhpWebsocketClient\Handler\FragmentUnpackableAwareInterface;
+use Totoro1302\PhpWebsocketClient\Service\FragmentSequenceFactory;
 use Totoro1302\PhpWebsocketClient\VO\Frame;
 
 class Unpacker
 {
-    private bool $finbit;
-    private Opcode $opcode;
-    private bool $masked;
-    private int $payloadLength = 0;
+    public function __construct(private readonly FragmentSequenceFactory $sequenceFactory)
+    {
+    }
 
-    public function unpack($resource): Frame
+    public function unpack($resource): void
     {
         if (!is_resource($resource)) {
             throw new StreamSocketException('Try to deserialize a non-resource type');
         }
 
+        $binaryData = null;
 
-        // return new Frame();
+        foreach ($this->sequenceFactory->getSequence() as $fragment) {
+
+            if (!$fragment instanceof FragmentUnpackableAwareInterface) {
+                throw new WebSocketProtocolException("Fragment cannot be unpack");
+            }
+
+            if (
+                $fragment instanceof FragmentBypassableAwareInterface
+                && $fragment->isBypassable()
+            ) {
+                continue;
+            }
+
+            if ($fragment instanceof FragmentLengthAwareInterface) {
+                $binaryData = $this->pull($fragment, $resource);
+            }
+
+            $fragment->unpack($binaryData);
+        }
     }
 
-    private function pull(FragmentSize $fragmentSize, $resource)
+    private function pull(FragmentLengthAwareInterface $fragment, $resource): string
     {
-        $response = stream_socket_recvfrom($resource, $fragmentSize->value);
+        $data = stream_socket_recvfrom($resource, $fragment->getLength());
 
-        if ($response === false) {
+        if ($data === false) {
             throw new StreamSocketException('Cannot read from stream socket resource');
         }
+
+        return $data;
     }
 }

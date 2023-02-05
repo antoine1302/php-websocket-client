@@ -11,9 +11,9 @@ class OpcodeFragmentHandler implements FragmentUnpackableAwareInterface
 {
     private const BITMASK = 0x0F;
     private Opcode $value;
-    public function unpack(string $binary): void
+    public function unpack(string $binaryData): void
     {
-        [$byte] = array_values(unpack('C', $binary));
+        [$byte] = array_values(unpack('C', $binaryData));
 
         $opcode = $byte & self::BITMASK;
 

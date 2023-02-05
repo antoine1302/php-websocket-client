@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Service;
 
-use Totoro1302\PhpWebsocketClient\Handler\FinFragmentHandler;
-use Totoro1302\PhpWebsocketClient\Handler\MaskedFragmentHandler;
-use Totoro1302\PhpWebsocketClient\Handler\MaskingKeyFragmentHandler;
-use Totoro1302\PhpWebsocketClient\Handler\OpcodeFragmentHandler;
-use Totoro1302\PhpWebsocketClient\Handler\PayloadExtended16bitFragmentHandler;
-use Totoro1302\PhpWebsocketClient\Handler\PayloadExtended64bitFragmentHandler;
-use Totoro1302\PhpWebsocketClient\Handler\PayloadFragmentHandler;
+use Totoro1302\PhpWebsocketClient\Handler\{
+    FinFragmentHandler,
+    MaskedFragmentHandler,
+    MaskingKeyFragmentHandler,
+    OpcodeFragmentHandler,
+    PayloadExtended16bitFragmentHandler,
+    PayloadExtended64bitFragmentHandler,
+    PayloadFragmentHandler
+};
 
 class FragmentSequenceFactory
 {
-    public function get(): array
+    public function getSequence(): array
     {
         $fin = new FinFragmentHandler();
         $opcode = new OpcodeFragmentHandler();
