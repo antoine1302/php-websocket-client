@@ -4,26 +4,36 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Handler;
 
-class PayloadFragmentHandler implements FragmentUnpackableAwareInterface
+class PayloadFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLengthAwareInterface
 {
-    private const BITMASK = 0x7F;
-    private int $value = 0;
+    private ?array $payloadLengthFragments;
 
     public function unpack(string $binaryData): void
     {
-        [$byte] = array_values(unpack('C', $binaryData));
-
-        $this->value = $byte & self::BITMASK;
-
     }
 
-    public function bypassCallback(int $payloadLength): bool
+    public function getLength(): ?int
     {
-        return $this->value < $payloadLength;
+        foreach ($this->payloadLengthFragments as $fragment) {
+            if (
+                $fragment instanceof FragmentUnpackableAwareInterface
+                && $fragment->getValue() === null
+            ) {
+                continue;
+            }
+            return $fragment->getValue();
+        }
+
+        return null;
     }
 
     public function getValue()
     {
-        return $this->value;
+
+    }
+
+    public function setPayloadLengthFragments(...$args): void
+    {
+        $this->payloadLengthFragments = $args;
     }
 }

@@ -9,8 +9,9 @@ use Totoro1302\PhpWebsocketClient\Handler\{
     MaskedFragmentHandler,
     MaskingKeyFragmentHandler,
     OpcodeFragmentHandler,
-    PayloadExtended16bitFragmentHandler,
-    PayloadExtended64bitFragmentHandler,
+    PayloadLengthExtended16bitFragmentHandler,
+    PayloadLengthExtended64bitFragmentHandler,
+    PayloadLengthFragmentHandler,
     PayloadFragmentHandler
 };
 
@@ -21,23 +22,26 @@ class FragmentSequenceFactory
         $fin = new FinFragmentHandler();
         $opcode = new OpcodeFragmentHandler();
         $masked = new MaskedFragmentHandler();
-        $payload = new PayloadFragmentHandler();
-        $payloadExtended16bit = new PayloadExtended16bitFragmentHandler();
-        $payloadExtended64bit = new PayloadExtended64bitFragmentHandler();
+        $payloadLength = new PayloadLengthFragmentHandler();
+        $payloadLength16bit = new PayloadLengthExtended16bitFragmentHandler();
+        $payloadLength64bit = new PayloadLengthExtended64bitFragmentHandler();
         $maskingKey = new MaskingKeyFragmentHandler();
+        $payload = new PayloadFragmentHandler();
 
-        $payloadExtended16bit->setBypassCallback($payload->bypassCallback(...));
-        $payloadExtended64bit->setBypassCallback($payload->bypassCallback(...));
+        $payloadLength16bit->setBypassCallback($payloadLength->bypassCallback(...));
+        $payloadLength64bit->setBypassCallback($payloadLength->bypassCallback(...));
 
         $maskingKey->setBypassCallback($masked->bypassCallback(...));
+
+        $payload->setPayloadLengthFragments($payloadLength64bit, $payloadLength16bit, $payloadLength);
 
         return [
             $fin,
             $opcode,
             $masked,
-            $payload,
-            $payloadExtended16bit,
-            $payloadExtended64bit,
+            $payloadLength,
+            $payloadLength16bit,
+            $payloadLength64bit,
             $maskingKey
         ];
     }

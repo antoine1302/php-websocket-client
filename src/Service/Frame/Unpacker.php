@@ -26,11 +26,12 @@ class Unpacker
         }
 
         $binaryData = null;
+        $fragmentList = [];
 
         foreach ($this->sequenceFactory->getSequence() as $fragment) {
 
             if (!$fragment instanceof FragmentUnpackableAwareInterface) {
-                throw new WebSocketProtocolException("Fragment cannot be unpack");
+                throw new WebSocketProtocolException("Fragment cannot be unpacked");
             }
 
             if (
@@ -45,6 +46,7 @@ class Unpacker
             }
 
             $fragment->unpack($binaryData);
+            $fragmentList[] = $fragment;
         }
     }
 
