@@ -8,8 +8,9 @@ class FinFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLe
 {
     private const BITMASK = 0x80;
     private const LENGTH = 1;
+    private const KEY = 'finBit';
     private ?bool $value;
-    
+
     public function unpack(string $binaryData): void
     {
         [$byte] = array_values(unpack('C', $binaryData));
@@ -25,5 +26,10 @@ class FinFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLe
     public function getValue()
     {
         return $this->value;
+    }
+
+    public function getKey(): string
+    {
+        return self::KEY;
     }
 }

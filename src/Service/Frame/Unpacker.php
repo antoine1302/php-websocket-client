@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Service\Frame;
 
-use Totoro1302\PhpWebsocketClient\Enum\FragmentSize;
 use Totoro1302\PhpWebsocketClient\Exception\StreamSocketException;
 use Totoro1302\PhpWebsocketClient\Exception\WebSocketProtocolException;
 use Totoro1302\PhpWebsocketClient\Handler\FragmentBypassableAwareInterface;
 use Totoro1302\PhpWebsocketClient\Handler\FragmentLengthAwareInterface;
 use Totoro1302\PhpWebsocketClient\Handler\FragmentUnpackableAwareInterface;
 use Totoro1302\PhpWebsocketClient\Service\FragmentSequenceFactory;
-use Totoro1302\PhpWebsocketClient\VO\Frame;
 
 class Unpacker
 {
@@ -46,7 +44,10 @@ class Unpacker
             }
 
             $fragment->unpack($binaryData);
-            $fragmentList[] = $fragment;
+
+            if($fragment->getValue() !== null) {
+                $fragmentList[$fragment->getKey()] = $fragment->getValue();
+            }
         }
     }
 

@@ -10,6 +10,7 @@ use Totoro1302\PhpWebsocketClient\Exception\WebSocketProtocolException;
 class OpcodeFragmentHandler implements FragmentUnpackableAwareInterface
 {
     private const BITMASK = 0x0F;
+    private const KEY = 'opcode';
     private Opcode $value;
     public function unpack(string $binaryData): void
     {
@@ -27,5 +28,10 @@ class OpcodeFragmentHandler implements FragmentUnpackableAwareInterface
     public function getValue()
     {
         return $this->value;
+    }
+
+    public function getkey(): string
+    {
+        return self::KEY;
     }
 }

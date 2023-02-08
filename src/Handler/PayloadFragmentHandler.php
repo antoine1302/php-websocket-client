@@ -6,10 +6,13 @@ namespace Totoro1302\PhpWebsocketClient\Handler;
 
 class PayloadFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLengthAwareInterface
 {
+    private const KEY = 'payload';
+    private string $value;
     private ?array $payloadLengthFragments;
 
     public function unpack(string $binaryData): void
     {
+        $this->value = $binaryData;
     }
 
     public function getLength(): ?int
@@ -29,7 +32,12 @@ class PayloadFragmentHandler implements FragmentUnpackableAwareInterface, Fragme
 
     public function getValue()
     {
+        return $this->value;
+    }
 
+    public function getKey(): string
+    {
+        return self::KEY;
     }
 
     public function setPayloadLengthFragments(...$args): void
