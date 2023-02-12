@@ -6,12 +6,12 @@ namespace Totoro1302\PhpWebsocketClient\Handler;
 
 use FragmentBypassableAwareTrait;
 
-class PayloadLengthExtended64bitFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLengthAwareInterface, FragmentBypassableAwareInterface
+class PayloadLengthExtended64bitFragmentHandler implements FragmentUnpackableAwareInterface, FragmentPullableAwareInterface, FragmentBypassableAwareInterface
 {
     use FragmentBypassableAwareTrait;
 
     private const LENGTH = 8;
-    private const PAYLOAD_VALUE = 127;
+    private const PAYLOAD_ID = 127;
     private ?int $value;
 
     public function unpack(string $binary): void
@@ -31,8 +31,8 @@ class PayloadLengthExtended64bitFragmentHandler implements FragmentUnpackableAwa
         return self::LENGTH;
     }
 
-    protected function getBypassCallbackArgs()
+    protected function getBypassCallbackArgs(): int
     {
-        return self::PAYLOAD_VALUE;
+        return self::PAYLOAD_ID;
     }
 }

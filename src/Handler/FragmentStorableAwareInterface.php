@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Handler;
 
-interface FragmentLengthAwareInterface
+interface FragmentStorableAwareInterface
 {
-    public function getLength(): int;
+    public function getKey(): string;
 }

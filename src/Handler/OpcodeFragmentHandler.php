@@ -25,7 +25,7 @@ class OpcodeFragmentHandler implements FragmentUnpackableAwareInterface
         }
     }
 
-    public function getValue()
+    public function getValue(): Opcode
     {
         return $this->value;
     }

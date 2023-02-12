@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Handler;
 
-class FinFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLengthAwareInterface
+class FinFragmentHandler implements FragmentUnpackableAwareInterface, FragmentPullableAwareInterface, FragmentStorableAwareInterface
 {
     private const BITMASK = 0x80;
     private const LENGTH = 1;
     private const KEY = 'finBit';
-    private ?bool $value;
+    private bool $value;
 
     public function unpack(string $binaryData): void
     {
@@ -23,7 +23,7 @@ class FinFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLe
         return self::LENGTH;
     }
 
-    public function getValue()
+    public function getValue(): bool
     {
         return $this->value;
     }

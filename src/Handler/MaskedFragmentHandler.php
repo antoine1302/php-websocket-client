@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Handler;
 
-class MaskedFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLengthAwareInterface
+class MaskedFragmentHandler implements FragmentUnpackableAwareInterface, FragmentPullableAwareInterface
 {
     private const BITMASK = 0x80;
     private const KEY = 'masked';
     private const LENGTH = 1;
-    private ?bool $value;
+    private bool $value;
     
     public function unpack(string $binaryData): void
     {
@@ -23,7 +23,7 @@ class MaskedFragmentHandler implements FragmentUnpackableAwareInterface, Fragmen
         return self::LENGTH;
     }
 
-    public function getValue()
+    public function getValue(): bool
     {
         return $this->value;
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Handler;
 
-class PayloadFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLengthAwareInterface
+class PayloadFragmentHandler implements FragmentUnpackableAwareInterface, FragmentPullableAwareInterface, FragmentStorableAwareInterface
 {
     private const KEY = 'payload';
     private string $value;
@@ -30,7 +30,7 @@ class PayloadFragmentHandler implements FragmentUnpackableAwareInterface, Fragme
         return null;
     }
 
-    public function getValue()
+    public function getValue(): string
     {
         return $this->value;
     }

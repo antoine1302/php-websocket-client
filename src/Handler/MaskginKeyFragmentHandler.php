@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Totoro1302\PhpWebsocketClient\Handler;
 use FragmentBypassableAwareTrait;
 
-class MaskingKeyFragmentHandler implements FragmentUnpackableAwareInterface, FragmentLengthAwareInterface, FragmentBypassableAwareInterface
+class MaskingKeyFragmentHandler implements FragmentUnpackableAwareInterface, FragmentPullableAwareInterface, FragmentBypassableAwareInterface
 {
     use FragmentBypassableAwareTrait;
 
     private const LENGTH = 4;
     private const BITMASK = 0x80;
-    private ?int $value;
+    private int $value;
     public function unpack(string $binary): void
     {
         [$byte] = array_values(unpack('C', $binary));
@@ -19,7 +19,7 @@ class MaskingKeyFragmentHandler implements FragmentUnpackableAwareInterface, Fra
         $this->value = $byte & self::BITMASK;
     }
 
-    public function getValue()
+    public function getValue(): int
     {
         return $this->value;
     }
@@ -29,7 +29,7 @@ class MaskingKeyFragmentHandler implements FragmentUnpackableAwareInterface, Fra
         return self::LENGTH;
     }
 
-    protected function getBypassCallbackArgs()
+    protected function getBypassCallbackArgs(): void
     {
         return;
     }
