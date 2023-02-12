@@ -9,8 +9,8 @@ use Totoro1302\PhpWebsocketClient\Handler\{
     MaskedFragmentHandler,
     MaskingKeyFragmentHandler,
     OpcodeFragmentHandler,
-    PayloadLengthExtended16bitFragmentHandler,
-    PayloadLengthExtended64bitFragmentHandler,
+    PayloadLength16bitFragmentHandler,
+    PayloadLength64bitFragmentHandler,
     PayloadLengthFragmentHandler,
     PayloadFragmentHandler
 };
@@ -23,8 +23,8 @@ class FragmentSequenceFactory
         $opcode = new OpcodeFragmentHandler();
         $masked = new MaskedFragmentHandler();
         $payloadLength = new PayloadLengthFragmentHandler();
-        $payloadLength16bit = new PayloadLengthExtended16bitFragmentHandler();
-        $payloadLength64bit = new PayloadLengthExtended64bitFragmentHandler();
+        $payloadLength16bit = new PayloadLength16bitFragmentHandler();
+        $payloadLength64bit = new PayloadLength64bitFragmentHandler();
         $maskingKey = new MaskingKeyFragmentHandler();
         $payload = new PayloadFragmentHandler();
 
@@ -42,7 +42,8 @@ class FragmentSequenceFactory
             $payloadLength,
             $payloadLength16bit,
             $payloadLength64bit,
-            $maskingKey
+            $maskingKey,
+            $payload
         ];
     }
 }
