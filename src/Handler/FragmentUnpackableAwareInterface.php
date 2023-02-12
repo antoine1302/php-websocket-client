@@ -9,5 +9,5 @@ interface FragmentUnpackableAwareInterface
 {
     public function unpack(string $binaryData): void;
 
-    public function getValue();
+    public function getValue(): mixed;
 }

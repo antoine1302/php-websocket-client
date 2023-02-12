@@ -14,5 +14,5 @@ trait FragmentBypassableAwareTrait
         $this->callback = $closure;
     }
 
-    abstract protected function getBypassCallbackArgs();
+    abstract protected function getBypassCallbackArgs(): mixed;
 }
