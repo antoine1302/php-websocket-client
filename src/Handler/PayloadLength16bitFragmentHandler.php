@@ -6,7 +6,7 @@ namespace Totoro1302\PhpWebsocketClient\Handler;
 
 use FragmentBypassableAwareTrait;
 
-class PayloadLengthExtended16bitFragmentHandler implements FragmentUnpackableAwareInterface, FragmentPullableAwareInterface, FragmentBypassableAwareInterface
+class PayloadLength16bitFragmentHandler implements FragmentUnpackableAwareInterface, FragmentPullableAwareInterface, FragmentBypassableAwareInterface
 {
     use FragmentBypassableAwareTrait;
 
