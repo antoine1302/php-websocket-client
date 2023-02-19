@@ -2,25 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Totoro1302\PhpWebsocketClient\Handler;
+namespace Totoro1302\PhpWebsocketClient\Service\Fragment;
 
-class FinFragmentHandler implements FragmentUnpackableAwareInterface, FragmentPullableAwareInterface, FragmentStorableAwareInterface
+class FinFragment implements FragmentAwareInterface, FragmentPullableAwareInterface, FragmentStorableAwareInterface
 {
     private const BITMASK = 0x80;
-    private const LENGTH = 1;
+    private const BYTE_LENGTH = 1;
     private const KEY = 'finBit';
     private bool $value;
 
-    public function unpack(string $binaryData): void
+    public function load(string $binaryData): void
     {
         [$byte] = array_values(unpack('C', $binaryData));
-
         $this->value = ($byte & self::BITMASK) === self::BITMASK;
     }
 
-    public function getLength(): int
+    public function getPullLength(): int
     {
-        return self::LENGTH;
+        return self::BYTE_LENGTH;
     }
 
     public function getValue(): bool

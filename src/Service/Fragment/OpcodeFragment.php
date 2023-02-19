@@ -2,17 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Totoro1302\PhpWebsocketClient\Handler;
+namespace Totoro1302\PhpWebsocketClient\Service\Fragment;
 
 use Totoro1302\PhpWebsocketClient\Enum\Opcode;
 use Totoro1302\PhpWebsocketClient\Exception\WebSocketProtocolException;
 
-class OpcodeFragmentHandler implements FragmentUnpackableAwareInterface
+class OpcodeFragment implements FragmentAwareInterface, FragmentStorableAwareInterface
 {
     private const BITMASK = 0x0F;
     private const KEY = 'opcode';
     private Opcode $value;
-    public function unpack(string $binaryData): void
+
+    public function load(string $binaryData)
     {
         [$byte] = array_values(unpack('C', $binaryData));
 
@@ -25,13 +26,13 @@ class OpcodeFragmentHandler implements FragmentUnpackableAwareInterface
         }
     }
 
+    public function getKey(): string
+    {
+        return self::KEY;
+    }
+
     public function getValue(): Opcode
     {
         return $this->value;
-    }
-
-    public function getkey(): string
-    {
-        return self::KEY;
     }
 }
