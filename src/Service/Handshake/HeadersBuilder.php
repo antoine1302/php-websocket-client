@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Totoro1302\PhpWebsocketClient\Service\Hansdshake;
+namespace Totoro1302\PhpWebsocketClient\Service\Handshake;
 
 use Psr\Http\Message\UriInterface;
 
@@ -10,47 +10,26 @@ class HeadersBuilder
 {
     private const WEBSOCKET_VERSION = 13;
 
-    public function build(UriInterface $uri, string $handshakeKey, ?array $subProtocols, ?string $origin): string
+    public function build(UriInterface $uri, string $handshakeKey): string
     {
         $fullPath = $uri->getPath() ?: '/';
         $fullPath .= $uri->getQuery();
 
-        $headers = sprintf(self::getHeaders(), $fullPath, $uri->getAuthority(), self::WEBSOCKET_VERSION, $handshakeKey);
-
-        if (!empty($subProtocols)) {
-            $headers .= PHP_EOL . self::addWebsocketSubProtocolHeader($subProtocols);
-        }
-
-        if (!empty($origin)) {
-            $headers .= PHP_EOL . self::addOriginHeader($origin);
-        }
-
-        return $headers;
+        return sprintf(self::getHeaders(), $fullPath, $uri->getAuthority(), self::WEBSOCKET_VERSION, $handshakeKey);
     }
 
     private static function getHeaders(): string
     {
         return <<<END
-            GET %s HTTP/1.1
-            Host: %s
-            Connection: Upgrade
-            Pragma: no-cache
-            Cache-Control: no-cache
-            Upgrade: websocket
-            Sec-WebSocket-Version: %s
-            Sec-WebSocket-Key: %s
+            GET %s HTTP/1.1\r
+            Host: %s\r
+            Connection: Upgrade\r
+            Pragma: no-cache\r
+            Cache-Control: no-cache\r
+            Upgrade: websocket\r
+            Sec-WebSocket-Version: %s\r
+            Sec-WebSocket-Key: %s\r
+            \r\n
             END;
-    }
-
-    private static function addWebsocketSubProtocolHeader(array $subProtocols): string
-    {
-        $subProtocols = implode($subProtocols, ', ');
-
-        return "Sec-WebSocket-Protocol: $subProtocols";
-    }
-
-    private static function addOriginHeader(string $origin): string
-    {
-        return "Origin: $origin";
     }
 }

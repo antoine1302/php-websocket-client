@@ -6,12 +6,12 @@ namespace Totoro1302\PhpWebsocketClient\VO;
 
 use Totoro1302\PhpWebsocketClient\Enum\Opcode;
 
-class Frame
+readonly class Frame
 {
     public function __construct(
-        private readonly bool $finBit,
-        private readonly Opcode $opcode,
-        private readonly string $payload
+        private bool $finBit,
+        private Opcode $opcode,
+        private string $payload
     ) {
     }
     

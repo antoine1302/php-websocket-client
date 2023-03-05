@@ -10,7 +10,7 @@ class MaskedFragment implements FragmentAwareInterface, FragmentPullableAwareInt
     private const BYTE_LENGTH = 1;
     private bool $value;
 
-    public function load(string $binaryData)
+    public function load(string $binaryData): void
     {
         [$byte] = array_values(unpack('C', $binaryData));
 

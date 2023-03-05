@@ -9,33 +9,31 @@ use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Totoro1302\PhpWebsocketClient\Exception\ClientException;
-use Totoro1302\PhpWebsocketClient\Service\Hansdshake\{HeadersBuilder, KeyGenerator, KeyValidator};
+use Totoro1302\PhpWebsocketClient\Service\Frame\Reader;
+use Totoro1302\PhpWebsocketClient\Service\Handshake\{HeadersBuilder, HeadersValidator, KeyGenerator};
 
 class Client implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    private ClientConfigInterface $clientConfig;
-    private UriFactoryInterface $uriFactory;
-    private KeyGenerator $keyGenerator;
-    private KeyValidator $keyValidator;
-    private HeadersBuilder $headersBuilder;
     private $resource;
 
     public function __construct(
-        ClientConfigInterface $clientConfig,
-        UriFactoryInterface $uriFactoryInterface,
-        KeyGenerator $keyGenerator,
-        KeyValidator $keyValidator
-    ) {
-        $this->clientConfig = $clientConfig;
-        $this->uriFactory = $uriFactoryInterface;
-        $this->keyGenerator = $keyGenerator;
-        $this->keyValidator = $keyValidator;
+        private readonly ClientConfigInterface $clientConfig,
+        private readonly UriFactoryInterface   $uriFactory,
+        private readonly KeyGenerator          $keyGenerator,
+        private readonly HeadersValidator      $headersValidator,
+        private readonly HeadersBuilder        $headersBuilder,
+        private readonly Reader                $reader
+    )
+    {
     }
 
     public function __destruct()
     {
+        if (is_resource($this->resource)) {
+            fclose($this->resource);
+        }
     }
 
     public function connect(): void
@@ -50,17 +48,15 @@ class Client implements LoggerAwareInterface
         $clientKey = $this->keyGenerator->generate();
         $clientHeaders = $this->headersBuilder->build(
             $uri,
-            $clientKey,
-            $this->clientConfig->getSubProtocols(),
-            $this->clientConfig->getOrigin()
+            $clientKey
         );
 
         $this->write($clientHeaders);
 
         $serverHeaders = $this->read();
 
-        if (false === $this->keyValidator->validate($clientKey, $serverHeaders)) {
-            throw new ClientException("Unable to validate key from server");
+        if (!$this->headersValidator->validate($clientKey, $serverHeaders)) {
+            throw new ClientException("Unable to validate server response headers");
         }
     }
 
@@ -73,8 +69,10 @@ class Client implements LoggerAwareInterface
         return true;
     }
 
-    public function pull(): void
+    public function pull(): string
     {
+        $frame = $this->reader->read($this->resource);
+        return $frame->getPayload();
     }
 
     public function push(): void
@@ -84,7 +82,6 @@ class Client implements LoggerAwareInterface
     private function open(UriInterface $uri, int $connectionTimeout): void
     {
         $connectionUri = $this->createConnectionUri($uri);
-
         // Add persistent flag
         $flags = STREAM_CLIENT_CONNECT;
         if ($this->clientConfig->isPersistent()) {
@@ -96,7 +93,7 @@ class Client implements LoggerAwareInterface
             $connectionUri,
             $errorCode,
             $errorMessage,
-            (float) $connectionTimeout,
+            (float)$connectionTimeout,
             $flags,
             stream_context_create()
         );
@@ -118,10 +115,9 @@ class Client implements LoggerAwareInterface
             ->withPath('')
             ->withQuery('')
             ->withFragment('')
-            ->withUserInfo('')
-        ;
+            ->withUserInfo('');
 
-        return (string) $connectionUri;
+        return (string)$connectionUri;
     }
 
     private function write(string $data): int
@@ -134,10 +130,13 @@ class Client implements LoggerAwareInterface
         return $resultCode;
     }
 
-    private function read(int $length = 1024): string
+    private function read(): string
     {
         $response = '';
-        while (false !== $buffer = stream_socket_recvfrom($this->resource, $length)) {
+        while (false !== $buffer = fgets($this->resource)) {
+            if ($buffer === "\r\n") {
+                break;
+            }
             $response .= $buffer;
         }
         return $response;

@@ -8,14 +8,17 @@ class ClientConfig implements ClientConfigInterface
 {
     private const CONNECTION_TIMEOUT_DEFAULT = 5;
     private const IS_PERSISTENT_DEFAULT = false;
+
     public function __construct(
-        private readonly string $name,
-        private readonly string $uri,
-        private readonly ?int $connectionTimeout = null,
+        private readonly string  $name,
+        private readonly string  $uri,
+        private readonly ?int    $connectionTimeout = null,
         private readonly ?string $origin = null,
-        private readonly ?bool $isPersistent = null,
-        private readonly ?array $subProtocols = null
-    ) {}
+        private readonly ?bool   $isPersistent = null,
+        private readonly ?array  $additionalHeaders = null
+    )
+    {
+    }
 
     public function getName(): string
     {
@@ -42,8 +45,8 @@ class ClientConfig implements ClientConfigInterface
         return $this->isPersistent ?? self::IS_PERSISTENT_DEFAULT;
     }
 
-    public function getSubProtocols(): ?array
+    public function getAdditionalHeaders(): ?array
     {
-        return $this->subProtocols;
+        return $this->additionalHeaders;
     }
 }
