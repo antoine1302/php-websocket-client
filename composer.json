@@ -10,7 +10,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-          "Totoro1302\\PhpWebsocketClient\\Tests": "tests/"
+          "Totoro1302\\PhpWebsocketClient\\Tests\\": "tests/"
         }
       },
     "authors": [
