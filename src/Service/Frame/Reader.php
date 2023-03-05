@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Service\Frame;
 
-use Totoro1302\PhpWebsocketClient\Exception\{
-    StreamSocketException,
-    WebSocketProtocolException
-};
-use Totoro1302\PhpWebsocketClient\Iterator\FragmentFilterIterator;
+use Totoro1302\PhpWebsocketClient\Exception\{StreamSocketException, WebSocketProtocolException};
 use Totoro1302\PhpWebsocketClient\Service\Fragment\{
     FragmentAwareInterface,
+    FragmentBypassableAwareInterface,
     FragmentPullableAwareInterface,
-    FragmentSequenceFactory
+    FragmentSequenceFactory,
+    FragmentStorableAwareInterface
 };
 use Totoro1302\PhpWebsocketClient\VO\Frame;
 
@@ -31,14 +29,20 @@ class Reader
         $binaryData = '';
         $fragmentList = [];
 
-        foreach (new FragmentFilterIterator($this->sequenceFactory->getSequence()) as $fragment) {
+        foreach ($this->sequenceFactory->getSequence() as $fragment) {
 
             if (!$fragment instanceof FragmentAwareInterface) {
                 throw new WebSocketProtocolException("Fragment must implement FragmentAwareInterface");
             }
 
+            if ($fragment instanceof FragmentBypassableAwareInterface) {
+                if ($fragment->isBypassable()) {
+                    continue;
+                }
+            }
+
             if ($fragment instanceof FragmentPullableAwareInterface) {
-                $binaryData = $this->pull($fragment, $resource);
+                $binaryData = $this->get($fragment, $resource);
             }
 
             $fragment->load($binaryData);
@@ -51,7 +55,7 @@ class Reader
         return new Frame(...$fragmentList);
     }
 
-    private function pull(FragmentPullableAwareInterface $fragment, $resource): string
+    private function get(FragmentPullableAwareInterface $fragment, $resource): string
     {
         $data = stream_socket_recvfrom($resource, $fragment->getPullLength());
 

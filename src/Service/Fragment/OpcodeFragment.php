@@ -13,7 +13,7 @@ class OpcodeFragment implements FragmentAwareInterface, FragmentStorableAwareInt
     private const KEY = 'opcode';
     private Opcode $value;
 
-    public function load(string $binaryData)
+    public function load(string $binaryData): void
     {
         [$byte] = array_values(unpack('C', $binaryData));
 

@@ -7,7 +7,6 @@ namespace Totoro1302\PhpWebsocketClient\Service\Fragment;
 class MaskingKeyFragment implements FragmentAwareInterface, FragmentPullableAwareInterface, FragmentBypassableAwareInterface
 {
     private const BYTE_LENGTH = 4;
-    private const BITMASK = 0x80;
     private ?string $value;
     private MaskedFragment $fragment;
 
@@ -16,7 +15,7 @@ class MaskingKeyFragment implements FragmentAwareInterface, FragmentPullableAwar
         $this->fragment = $fragment;
     }
 
-    public function load(string $binaryData)
+    public function load(string $binaryData): void
     {
         $this->value = $binaryData;
     }

@@ -1,15 +1,14 @@
 <?php
 
-namespace Totoro1302\PhpWebsocketClient\Service\Fragment;
-
-
 declare(strict_types=1);
 
-class PayloadLength64bitFragment implements FragmentAwareInterface, FragmentPayloadLengthAwareInterface, FragmentBypassableAwareInterface
+namespace Totoro1302\PhpWebsocketClient\Service\Fragment;
+
+class PayloadLength64BitFragment implements FragmentAwareInterface, FragmentPullableAwareInterface, FragmentPayloadLengthAwareInterface, FragmentBypassableAwareInterface
 {
-    private const BYTE_LENGTH = 2;
+    private const BYTE_LENGTH = 8;
     private const PAYLOAD_THRESHOLD = 127;
-    private ?int $value;
+    private ?int $value = null;
     private FragmentPayloadLengthAwareInterface $fragment;
 
     public function __construct(FragmentPayloadLengthAwareInterface $fragment)
@@ -22,6 +21,11 @@ class PayloadLength64bitFragment implements FragmentAwareInterface, FragmentPayl
         [$byte] = array_values(unpack('n', $binaryData));
 
         $this->value = $byte;
+    }
+
+    public function getPullLength(): int
+    {
+        return self::BYTE_LENGTH;
     }
 
     public function getPayloadLength(): ?int

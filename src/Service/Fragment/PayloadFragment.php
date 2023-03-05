@@ -20,7 +20,7 @@ class PayloadFragment implements FragmentAwareInterface, FragmentPullableAwareIn
         $this->fragment = $fragment;
     }
 
-    public function load(string $binaryData)
+    public function load(string $binaryData): void
     {
         $this->value = $binaryData;
     }
@@ -60,7 +60,6 @@ class PayloadFragment implements FragmentAwareInterface, FragmentPullableAwareIn
         }
 
         $maskingKey = $this->fragment->getMaskingKey();
-        $payloadUnmasked = '';
 
         foreach (new MaskedPayloadIterator($this->value, $maskingKey) as $unmaskedByte) {
             $payloadUnmasked .= $unmaskedByte;
