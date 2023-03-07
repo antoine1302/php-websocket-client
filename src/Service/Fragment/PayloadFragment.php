@@ -11,13 +11,10 @@ class PayloadFragment implements FragmentAwareInterface, FragmentPullableAwareIn
 {
     private const KEY = 'payload';
     private string $value;
-
-    private MaskingKeyFragment $fragment;
     private array $entities;
 
-    public function __construct(MaskingKeyFragment $fragment)
+    public function __construct(private readonly MaskingKeyFragment $fragment)
     {
-        $this->fragment = $fragment;
     }
 
     public function load(string $binaryData): void
@@ -60,6 +57,8 @@ class PayloadFragment implements FragmentAwareInterface, FragmentPullableAwareIn
         }
 
         $maskingKey = $this->fragment->getMaskingKey();
+
+        $payloadUnmasked = '';
 
         foreach (new MaskedPayloadIterator($this->value, $maskingKey) as $unmaskedByte) {
             $payloadUnmasked .= $unmaskedByte;
