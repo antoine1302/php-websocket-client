@@ -14,9 +14,9 @@ use Totoro1302\PhpWebsocketClient\Service\Fragment\{
 };
 use Totoro1302\PhpWebsocketClient\VO\Frame;
 
-class Reader
+readonly class Reader
 {
-    public function __construct(private readonly FragmentSequenceFactory $sequenceFactory)
+    public function __construct(private FragmentSequenceFactory $sequenceFactory)
     {
     }
 

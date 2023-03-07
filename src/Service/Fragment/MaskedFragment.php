@@ -26,5 +26,4 @@ class MaskedFragment implements FragmentAwareInterface, FragmentPullableAwareInt
     {
         return $this->value;
     }
-
 }

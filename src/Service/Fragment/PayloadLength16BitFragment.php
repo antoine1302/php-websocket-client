@@ -9,11 +9,9 @@ class PayloadLength16BitFragment implements FragmentAwareInterface, FragmentPull
     private const BYTE_LENGTH = 2;
     private const PAYLOAD_THRESHOLD = 126;
     private ?int $value = null;
-    private FragmentPayloadLengthAwareInterface $fragment;
 
-    public function __construct(FragmentPayloadLengthAwareInterface $fragment)
+    public function __construct(private readonly FragmentPayloadLengthAwareInterface $fragment)
     {
-        $this->fragment = $fragment;
     }
 
     public function load(string $binaryData): void
