@@ -9,7 +9,7 @@ use Totoro1302\PhpWebsocketClient\Exception\WebSocketProtocolException;
 
 class OpcodeFragment implements FragmentAwareInterface, FragmentStorableAwareInterface
 {
-    private const BITMASK = 0x0F;
+    public const BITMASK = 0x0F;
     private const KEY = 'opcode';
     private Opcode $value;
 
@@ -22,7 +22,7 @@ class OpcodeFragment implements FragmentAwareInterface, FragmentStorableAwareInt
         $this->value = Opcode::tryFrom($opcode);
 
         if ($this->value === null) {
-            throw new WebSocketProtocolException('Unpacking Opcode fragment failed');
+            throw new WebSocketProtocolException('Invalid Opcode');
         }
     }
 

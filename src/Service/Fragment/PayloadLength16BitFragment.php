@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Service\Fragment;
 
-class PayloadLength16BitFragment implements FragmentAwareInterface, FragmentPullableAwareInterface, FragmentPayloadLengthAwareInterface, FragmentBypassableAwareInterface
+class PayloadLength16BitFragment implements FragmentAwareInterface, FragmentPullableAwareInterface, FragmentPayloadLengthAwareInterface,
+                                            FragmentBypassableAwareInterface
 {
+    public const PAYLOAD_INDEX = 126;
+    public const PAYLOAD_THRESHOLD = 0xFFFF;
     private const BYTE_LENGTH = 2;
-    private const PAYLOAD_THRESHOLD = 126;
     private ?int $value = null;
 
     public function __construct(private readonly FragmentPayloadLengthAwareInterface $fragment)

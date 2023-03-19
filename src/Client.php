@@ -8,9 +8,12 @@ use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Totoro1302\PhpWebsocketClient\Enum\Opcode;
 use Totoro1302\PhpWebsocketClient\Exception\ClientException;
 use Totoro1302\PhpWebsocketClient\Service\Frame\Reader;
+use Totoro1302\PhpWebsocketClient\Service\Frame\Writer;
 use Totoro1302\PhpWebsocketClient\Service\Handshake\{HeadersBuilder, HeadersValidator, KeyGenerator};
+use Totoro1302\PhpWebsocketClient\VO\Frame;
 
 class Client implements LoggerAwareInterface
 {
@@ -24,7 +27,8 @@ class Client implements LoggerAwareInterface
         private readonly KeyGenerator $keyGenerator,
         private readonly HeadersValidator $headersValidator,
         private readonly HeadersBuilder $headersBuilder,
-        private readonly Reader $reader
+        private readonly Reader $reader,
+        private readonly Writer $writer
     ) {
     }
 
@@ -74,8 +78,20 @@ class Client implements LoggerAwareInterface
         return $frame->getPayload();
     }
 
-    public function push(): void
+    public function push(string $payload, Opcode $opcode, bool $isMasked = true): void
     {
+        if (strlen($payload) < PHP_INT_MAX) {
+            $frameCollection = [new Frame(true, $opcode, $payload)];
+        } else {
+            $payloadExplode = str_split($payload, 4096);
+            $finalPayload = array_pop($payloadExplode);
+            $finalFrame = new Frame(true, $opcode, $finalPayload);
+
+            $frameCollection = array_map(fn($payloadChunk) => new Frame(false, $opcode, $payloadChunk), $payloadExplode);
+            $frameCollection[] = $finalFrame;
+        }
+
+        $this->writer->write($this->resource, $frameCollection, $isMasked);
     }
 
     private function open(UriInterface $uri, int $connectionTimeout): void

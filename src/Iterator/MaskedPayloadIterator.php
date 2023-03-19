@@ -7,16 +7,21 @@ namespace Totoro1302\PhpWebsocketClient\Iterator;
 class MaskedPayloadIterator implements \Iterator
 {
     private int $cursor = 0;
+    private readonly array $maskingKey;
+    private readonly array $payload;
 
     public function __construct(
-        private readonly string $payload,
-        private readonly string $maskingKey
+        string $payload,
+        string $maskingKey
     ) {
+        $this->maskingKey = array_values(unpack('C4', $maskingKey));
+        $this->payload = array_values(unpack('C*', $payload));
     }
 
     public function current(): string
     {
-        return $this->payload[$this->cursor] ^ $this->maskingKey[$this->cursor % 4];
+        $byteXor = $this->payload[$this->cursor] ^ $this->maskingKey[$this->cursor % 4];
+        return pack('C', $byteXor);
     }
 
     public function key(): int
