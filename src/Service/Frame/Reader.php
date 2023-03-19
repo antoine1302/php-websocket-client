@@ -23,7 +23,7 @@ readonly class Reader
     public function read($resource): Frame
     {
         if (!is_resource($resource)) {
-            throw new StreamSocketException('Try to deserialize a non-resource type');
+            throw new StreamSocketException('Try to use a non-resource type');
         }
 
         $binaryData = '';
@@ -42,7 +42,7 @@ readonly class Reader
             }
 
             if ($fragment instanceof FragmentPullableAwareInterface) {
-                $binaryData = $this->get($fragment, $resource);
+                $binaryData = $this->receive($fragment, $resource);
             }
 
             $fragment->load($binaryData);
@@ -55,7 +55,7 @@ readonly class Reader
         return new Frame(...$fragmentList);
     }
 
-    private function get(FragmentPullableAwareInterface $fragment, $resource): string
+    private function receive(FragmentPullableAwareInterface $fragment, $resource): string
     {
         $data = stream_socket_recvfrom($resource, $fragment->getPullLength());
 

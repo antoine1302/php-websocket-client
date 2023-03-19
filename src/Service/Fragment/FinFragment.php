@@ -6,7 +6,7 @@ namespace Totoro1302\PhpWebsocketClient\Service\Fragment;
 
 class FinFragment implements FragmentAwareInterface, FragmentPullableAwareInterface, FragmentStorableAwareInterface
 {
-    private const BITMASK = 0x80;
+    public const BITMASK = 0x80;
     private const BYTE_LENGTH = 1;
     private const KEY = 'finBit';
     private bool $value;
