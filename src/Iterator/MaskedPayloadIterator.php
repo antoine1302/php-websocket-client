@@ -14,8 +14,8 @@ class MaskedPayloadIterator implements \Iterator
         string $payload,
         string $maskingKey
     ) {
-        $this->maskingKey = array_values(unpack('C4', $maskingKey));
         $this->payload = array_values(unpack('C*', $payload));
+        $this->maskingKey = array_values(unpack('C4', $maskingKey));
     }
 
     public function current(): string

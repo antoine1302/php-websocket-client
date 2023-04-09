@@ -12,8 +12,11 @@ use Totoro1302\PhpWebsocketClient\Service\Fragment\PayloadLength16BitFragment;
 use Totoro1302\PhpWebsocketClient\Service\Fragment\PayloadLength64BitFragment;
 use Totoro1302\PhpWebsocketClient\VO\Frame;
 
-readonly class Writer
+class Writer
 {
+    private string $packFormat = '';
+    private array $fragmentCollection = [];
+
     public function write($socket, array $frameCollection, bool $isMasked): void
     {
         if (!is_resource($socket)) {
@@ -25,51 +28,82 @@ readonly class Writer
                 throw new \LogicException("Require instance of Frame class");
             }
 
-            $packFormat = '';
-            $fragmentCollection = [];
+            $this->initialize();
 
-            $finBit = $frame->isFinal() ? FinFragment::BITMASK : 0;
-            $fragmentCollection[] = $finBit | $frame->getOpcode()->value;
-
-            $masked = $isMasked ? MaskedFragment::BITMASK : 0;
-            $payloadLength = strlen($frame->getPayload());
-            $payloadLengthIndicator = match (true) {
-                ($payloadLength < PayloadLength16BitFragment::PAYLOAD_INDEX) => $payloadLength,
-                ($payloadLength < PayloadLength16BitFragment::PAYLOAD_THRESHOLD) => PayloadLength16BitFragment::PAYLOAD_INDEX,
-                default => PayloadLength64BitFragment::PAYLOAD_INDEX
-            };
-            $fragmentCollection[] = $masked | $payloadLengthIndicator;
-
-            $packFormat .= 'C2';
+            $this->buildFinAndOpcodeFragment($frame);
+            [$payloadLengthIndicator, $payloadLength] = $this->buildMaskedAndPayloadFragment($frame, $isMasked);
 
             if ($payloadLengthIndicator === PayloadLength16BitFragment::PAYLOAD_INDEX) {
-                $fragmentCollection[] = $payloadLength;
-                $packFormat .= 'n';
+                $this->buildPayloadLengthExtended16BitFragment($payloadLength);
             } elseif ($payloadLengthIndicator === PayloadLength64BitFragment::PAYLOAD_INDEX) {
-                $fragmentCollection[] = $payloadLength;
-                $packFormat .= 'J';
+                $this->buildPayloadLengthExtended64BitFragment($payloadLength);
             }
 
-            $payload = $frame->getPayload();
-            if ($isMasked) {
-                $maskingKey = random_bytes(4);
-                $fragmentCollection[] = $maskingKey;
-                $packFormat .= 'N';
+            $maskingKey = $isMasked ? random_bytes(4) : null;
 
-                $payload = '';
-                foreach (new MaskedPayloadIterator($frame->getPayload(), $maskingKey) as $maskedByte) {
-                    $payload .= $maskedByte;
-                }
-            }
-
-            $binaryData = pack($packFormat, ...$fragmentCollection);
-            $binaryData .= $payload;
+            $binaryData = pack($this->packFormat, ...$this->fragmentCollection);
+            $binaryData .= $maskingKey ?? '';
+            $binaryData .= $this->buildPayload($frame, $maskingKey);;
             $this->send($socket, $binaryData);
         }
     }
 
-    private function send($stream, $data): void
+    private function initialize(): void
     {
-        stream_socket_sendto($stream, $data);
+        $this->packFormat = '';
+        $this->fragmentCollection = [];
+    }
+
+    private function buildFinAndOpcodeFragment(Frame $frame): void
+    {
+        $finBit = $frame->isFinal() ? FinFragment::BITMASK : 0;
+        $this->fragmentCollection[] = $finBit | $frame->getOpcode()->value;
+        $this->packFormat .= 'C';
+    }
+
+    private function buildMaskedAndPayloadFragment(Frame $frame, bool $isMasked): array
+    {
+        $masked = $isMasked ? MaskedFragment::BITMASK : 0;
+        $payloadLength = strlen($frame->getPayload());
+        $payloadLengthIndicator = match (true) {
+            ($payloadLength < PayloadLength16BitFragment::PAYLOAD_INDEX) => $payloadLength,
+            ($payloadLength < PayloadLength16BitFragment::PAYLOAD_THRESHOLD) => PayloadLength16BitFragment::PAYLOAD_INDEX,
+            default => PayloadLength64BitFragment::PAYLOAD_INDEX
+        };
+        $this->fragmentCollection[] = $masked | $payloadLengthIndicator;
+        $this->packFormat .= 'C';
+
+        return [$payloadLengthIndicator, $payloadLength];
+    }
+
+    private function buildPayloadLengthExtended16BitFragment(int $payloadLength): void
+    {
+        $this->fragmentCollection[] = $payloadLength;
+        $this->packFormat .= 'n';
+    }
+
+    private function buildPayloadLengthExtended64BitFragment(int $payloadLength): void
+    {
+        $this->fragmentCollection[] = $payloadLength;
+        $this->packFormat .= 'J';
+    }
+
+    private function buildPayload(Frame $frame, ?string $maskingKey): string
+    {
+        if ($maskingKey === null) {
+            return $frame->getPayload();
+        }
+
+        $payload = '';
+        foreach (new MaskedPayloadIterator($frame->getPayload(), $maskingKey) as $maskedByte) {
+            $payload .= $maskedByte;
+        }
+
+        return $payload;
+    }
+
+    private function send($socket, $data): void
+    {
+        stream_socket_sendto($socket, $data);
     }
 }
