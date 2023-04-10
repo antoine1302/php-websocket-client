@@ -8,6 +8,7 @@ use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Totoro1302\PhpWebsocketClient\Enum\CloseStatusCode;
 use Totoro1302\PhpWebsocketClient\Enum\Opcode;
 use Totoro1302\PhpWebsocketClient\Exception\ClientException;
 use Totoro1302\PhpWebsocketClient\Service\Frame\Reader;
@@ -19,7 +20,15 @@ class Client implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
+    private const STATE_CLOSED = -1;
+    private const STATE_STARTING = 0;
+    private const STATE_CONNECTED = 1;
+    private const STATE_TERMINATING = 2;
+    private const AWAIT_HEARTBEAT = 30;
+    private const PING_DATA = 'Are you alive?';
     private $resource;
+    private int $currentState = self::STATE_CLOSED;
+    private int $lastCheckTs;
 
     public function __construct(
         private readonly ClientConfigInterface $clientConfig,
@@ -34,13 +43,12 @@ class Client implements LoggerAwareInterface
 
     public function __destruct()
     {
-        if (is_resource($this->resource)) {
-            fclose($this->resource);
-        }
+        $this->shutdownSocket();
     }
 
     public function connect(): void
     {
+        $this->currentState = self::STATE_STARTING;
         $uri = $this->uriFactory->createUri($this->clientConfig->getUri());
 
         $this->open(
@@ -61,21 +69,48 @@ class Client implements LoggerAwareInterface
         if (!$this->headersValidator->validate($clientKey, $serverHeaders)) {
             throw new ClientException("Unable to validate server response headers");
         }
-    }
 
-    public function disconnect(): void
-    {
-    }
-
-    public function isConnected(): bool
-    {
-        return true;
+        $this->registerSignalHandler();
+        $this->currentState = self::STATE_CONNECTED;
+        $this->lastCheckTs = time();
     }
 
     public function pull(): string
     {
-        $frame = $this->reader->read($this->resource);
-        return $frame->getPayload();
+        $payload = '';
+
+        while ($this->isRunning()) {
+            $frame = $this->reader->read($this->resource);
+            switch ($frame->getOpcode()) {
+                case Opcode::Ping:
+                    $this->pong($frame->getPayload());
+                    break;
+                case Opcode::Pong:
+                    if ($frame->getPayload() === self::PING_DATA) {
+                        $this->currentState = self::STATE_CONNECTED;
+                        $this->lastCheckTs = time();
+                    }
+                    break;
+                case Opcode::Close:
+                    if ($this->currentState === self::STATE_CONNECTED) {
+                        $this->close($frame->getPayload());
+                    }
+                    $this->currentState = self::STATE_CLOSED;
+                    $this->shutdownSocket();
+                    break;
+                case Opcode::Text:
+                case Opcode::Binary:
+                case Opcode::Continuation:
+                    $payload .= $frame->getPayload();
+                    if ($frame->isFinal()) {
+                        break 2;
+                    } else {
+                        break;
+                    }
+            }
+        }
+
+        return $payload;
     }
 
     public function push(string $payload, Opcode $opcode, bool $isMasked = true): void
@@ -83,15 +118,74 @@ class Client implements LoggerAwareInterface
         if (strlen($payload) < PHP_INT_MAX) {
             $frameCollection = [new Frame(true, $opcode, $payload)];
         } else {
-            $payloadExplode = str_split($payload, 4096);
-            $finalPayload = array_pop($payloadExplode);
-            $finalFrame = new Frame(true, $opcode, $finalPayload);
+            $payloadExploded = str_split($payload, 4096);
 
-            $frameCollection = array_map(fn($payloadChunk) => new Frame(false, $opcode, $payloadChunk), $payloadExplode);
-            $frameCollection[] = $finalFrame;
+            $firstPayload = array_shift($payloadExploded);
+            $firstFrame = new Frame(false, $opcode, $firstPayload);
+
+            $finalPayload = array_pop($payloadExploded);
+            $finalFrame = new Frame(true, Opcode::Continuation, $finalPayload);
+
+            $frameCollection = [
+                $firstFrame,
+                ...array_map(fn($payloadChunk) => new Frame(false, $opcode, $payloadChunk), $payloadExploded),
+                $finalFrame
+            ];
         }
 
         $this->writer->write($this->resource, $frameCollection, $isMasked);
+    }
+
+    public function ping(string $payload): void
+    {
+        $this->push($payload, Opcode::Ping);
+    }
+
+    public function pong(string $payload): void
+    {
+        $this->push($payload, Opcode::Pong);
+    }
+
+    public function close(string $payload): void
+    {
+        $this->push($payload, Opcode::Close);
+    }
+
+    public function isRunning(bool $verifyLiveness = true): bool
+    {
+        if ($verifyLiveness) {
+            $this->checkHeartbeat();
+        }
+
+        return $this->currentState > self::STATE_STARTING;
+    }
+
+    public function checkHeartbeat(): void
+    {
+        if ((time() - $this->lastCheckTs) > self::AWAIT_HEARTBEAT) {
+            if ($this->currentState === self::STATE_TERMINATING) {
+                $this->requestTerminate();
+                $this->shutdownSocket();
+                $this->currentState = self::STATE_CLOSED;
+            } else {
+                $this->ping(self::PING_DATA);
+                $this->currentState = self::STATE_TERMINATING;
+                $this->lastCheckTs = time();
+            }
+        }
+    }
+
+    private function shutdownSocket(): void
+    {
+        if (is_resource($this->resource)) {
+            fclose($this->resource);
+        }
+    }
+
+    private function requestTerminate(): void
+    {
+        $this->currentState = self::STATE_TERMINATING;
+        $this->close(pack('n', CloseStatusCode::Normal->value));
     }
 
     private function open(UriInterface $uri, int $connectionTimeout): void
@@ -118,6 +212,13 @@ class Client implements LoggerAwareInterface
             // Todo: Add log error/warning here
             throw $exception;
         }
+    }
+
+    private function registerSignalHandler(): void
+    {
+        pcntl_signal(SIGTERM, $this->requestTerminate(...));
+        pcntl_signal(SIGINT, $this->requestTerminate(...));
+        pcntl_signal(SIGQUIT, $this->requestTerminate(...));
     }
 
     private function createConnectionUri(UriInterface $uri): string

@@ -6,7 +6,7 @@ namespace Totoro1302\PhpWebsocketClient\Service\Handshake;
 
 use Psr\Http\Message\UriInterface;
 
-class HeadersBuilder
+readonly class HeadersBuilder
 {
     private const WEBSOCKET_VERSION = 13;
 
