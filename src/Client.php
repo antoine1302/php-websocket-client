@@ -24,10 +24,11 @@ class Client implements LoggerAwareInterface
     private const STATE_STARTING = 0;
     private const STATE_CONNECTED = 1;
     private const STATE_TERMINATING = 2;
+    private const AWAIT_HEARTBEAT = 30;
+    private const PING_DATA = 'Are you alive?';
     private $resource;
-
     private int $currentState = self::STATE_CLOSED;
-    private bool $isAlive = true;
+    private int $lastCheckTs;
 
     public function __construct(
         private readonly ClientConfigInterface $clientConfig,
@@ -71,6 +72,7 @@ class Client implements LoggerAwareInterface
 
         $this->registerSignalHandler();
         $this->currentState = self::STATE_CONNECTED;
+        $this->lastCheckTs = time();
     }
 
     public function pull(): string
@@ -82,6 +84,12 @@ class Client implements LoggerAwareInterface
             switch ($frame->getOpcode()) {
                 case Opcode::Ping:
                     $this->pong($frame->getPayload());
+                    break;
+                case Opcode::Pong:
+                    if ($frame->getPayload() === self::PING_DATA) {
+                        $this->currentState = self::STATE_CONNECTED;
+                        $this->lastCheckTs = time();
+                    }
                     break;
                 case Opcode::Close:
                     if ($this->currentState === self::STATE_CONNECTED) {
@@ -143,23 +151,26 @@ class Client implements LoggerAwareInterface
         $this->push($payload, Opcode::Close);
     }
 
-    public function isRunning(): bool
+    public function isRunning(bool $verifyLiveness = true): bool
     {
+        if ($verifyLiveness) {
+            $this->checkHeartbeat();
+        }
+
         return $this->currentState > self::STATE_STARTING;
     }
 
     public function checkHeartbeat(): void
     {
-        $pid = pcntl_fork();
-
-        if ($pid < 0) {
-            throw new ClientException("Failed to fork during heartbeat");
-        } elseif ($pid > 0) {
-            // Do nothing in parent process
-        } else {
-            while (true) {
-                echo 'From child...' . PHP_EOL;
-                sleep(5);
+        if ((time() - $this->lastCheckTs) > self::AWAIT_HEARTBEAT) {
+            if ($this->currentState === self::STATE_TERMINATING) {
+                $this->requestTerminate();
+                $this->shutdownSocket();
+                $this->currentState = self::STATE_CLOSED;
+            } else {
+                $this->ping(self::PING_DATA);
+                $this->currentState = self::STATE_TERMINATING;
+                $this->lastCheckTs = time();
             }
         }
     }
