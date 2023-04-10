@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Totoro1302\PhpWebsocketClient\Service\Handshake;
 
-class KeyGenerator
+readonly class KeyGenerator
 {
     private const BYTES_LENGTH = 16;
     public function generate(): string

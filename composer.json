@@ -21,6 +21,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=8.2",
+        "ext-pcntl": "*",
         "psr/log": "^3.0",
         "psr/clock": "^1.0",
         "symfony/clock": "^6.2",

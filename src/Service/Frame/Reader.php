@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Totoro1302\PhpWebsocketClient\Service\Frame;
 
 use Totoro1302\PhpWebsocketClient\Exception\{StreamSocketException, WebSocketProtocolException};
-use Totoro1302\PhpWebsocketClient\Service\Fragment\{
-    FragmentAwareInterface,
+use Totoro1302\PhpWebsocketClient\Service\Fragment\{FragmentAwareInterface,
     FragmentBypassableAwareInterface,
     FragmentPullableAwareInterface,
     FragmentSequenceFactory,
@@ -57,6 +56,10 @@ readonly class Reader
 
     private function receive(FragmentPullableAwareInterface $fragment, $resource): string
     {
+        if ($fragment->getPullLength() === 0) {
+            return '';
+        }
+
         $data = stream_socket_recvfrom($resource, $fragment->getPullLength());
 
         if ($data === false) {
