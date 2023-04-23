@@ -13,7 +13,7 @@ readonly class HeadersBuilder
     public function build(UriInterface $uri, string $handshakeKey): string
     {
         $fullPath = $uri->getPath() ?: '/';
-        $fullPath .= $uri->getQuery();
+        $fullPath .= '?' . $uri->getQuery();
 
         return sprintf(self::getHeaders(), $fullPath, $uri->getAuthority(), self::WEBSOCKET_VERSION, $handshakeKey);
     }

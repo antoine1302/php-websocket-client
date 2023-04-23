@@ -35,6 +35,6 @@ class PayloadLength16BitFragment implements FragmentAwareInterface, FragmentPull
 
     public function isBypassable(): bool
     {
-        return !(self::PAYLOAD_THRESHOLD === $this->fragment->getPayloadLength());
+        return !(self::PAYLOAD_INDEX === $this->fragment->getPayloadLength());
     }
 }

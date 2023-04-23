@@ -104,6 +104,6 @@ class Writer
 
     private function send($socket, $data): void
     {
-        stream_socket_sendto($socket, $data);
+        fwrite($socket, $data);
     }
 }

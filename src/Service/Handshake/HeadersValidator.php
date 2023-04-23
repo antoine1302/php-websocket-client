@@ -10,11 +10,11 @@ readonly class HeadersValidator
 {
     private const HANDSHAKE_MAGIC_STRING = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
     private const HTTP_RESPONSE_LINE_STATUS = 'HTTP/1.1 101 Switching Protocols';
-    private const HTTP_UPGRADE_HEADER = 'Upgrade: websocket';
-    private const HTTP_CONNECTION_HEADER = 'Connection: Upgrade';
+    private const HTTP_UPGRADE_HEADER = ['Upgrade: websocket', 'Upgrade: Websocket'];
+    private const HTTP_CONNECTION_HEADER = ['Connection: Upgrade', 'Connection: upgrade'];
     private const WEBSOCKET_ACCEPT_HEADER = '/^Sec-WebSocket-Accept:\s(.+)$/';
 
-    public function validate(string $websocketKey, string $responseHeaders): true
+    public function validate(string $websocketKey, string $responseHeaders): void
     {
         $headers = explode(PHP_EOL, $responseHeaders);
 
@@ -24,8 +24,6 @@ readonly class HeadersValidator
 
         $expectedKey = $this->getExpectedKey($websocketKey);
         $this->assertWebsocketAcceptHeaderIsValid($headers, $expectedKey);
-
-        return true;
     }
 
     private function assertHttpStatusIsValid(array $responseHeaders): void
@@ -42,7 +40,7 @@ readonly class HeadersValidator
     private function assertUpgradeHeaderIsValid(array $responseHeaders): void
     {
         foreach ($responseHeaders as $header) {
-            if (trim($header) === self::HTTP_UPGRADE_HEADER) {
+            if (in_array(trim($header), self::HTTP_UPGRADE_HEADER)) {
                 return;
             }
         }
@@ -53,7 +51,7 @@ readonly class HeadersValidator
     private function assertConnectionHeaderIsValid(array $responseHeaders): void
     {
         foreach ($responseHeaders as $header) {
-            if (trim($header) === self::HTTP_CONNECTION_HEADER) {
+            if (in_array(trim($header), self::HTTP_CONNECTION_HEADER)) {
                 return;
             }
         }
