@@ -60,7 +60,7 @@ readonly class Reader
             return '';
         }
 
-        $data = stream_socket_recvfrom($resource, $fragment->getPullLength());
+        $data = fread($resource, $fragment->getPullLength());
 
         if ($data === false) {
             throw new StreamSocketException('Cannot read from stream socket resource');

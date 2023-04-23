@@ -25,19 +25,19 @@ class Client implements LoggerAwareInterface
     private const STATE_CONNECTED = 1;
     private const STATE_TERMINATING = 2;
     private const AWAIT_HEARTBEAT = 30;
-    private const PING_DATA = 'Are you alive?';
+    private const PING_DATA = 'Are you alive ?';
     private $resource;
     private int $currentState = self::STATE_CLOSED;
     private int $lastCheckTs;
 
     public function __construct(
         private readonly ClientConfigInterface $clientConfig,
-        private readonly UriFactoryInterface $uriFactory,
-        private readonly KeyGenerator $keyGenerator,
-        private readonly HeadersValidator $headersValidator,
-        private readonly HeadersBuilder $headersBuilder,
-        private readonly Reader $reader,
-        private readonly Writer $writer
+        private readonly UriFactoryInterface   $uriFactory,
+        private readonly KeyGenerator          $keyGenerator,
+        private readonly HeadersValidator      $headersValidator,
+        private readonly HeadersBuilder        $headersBuilder,
+        private readonly Reader                $reader,
+        private readonly Writer                $writer
     ) {
     }
 
@@ -66,9 +66,7 @@ class Client implements LoggerAwareInterface
 
         $serverHeaders = $this->read();
 
-        if (!$this->headersValidator->validate($clientKey, $serverHeaders)) {
-            throw new ClientException("Unable to validate server response headers");
-        }
+        $this->headersValidator->validate($clientKey, $serverHeaders);
 
         $this->registerSignalHandler();
         $this->currentState = self::STATE_CONNECTED;
@@ -238,7 +236,7 @@ class Client implements LoggerAwareInterface
 
     private function write(string $data): int
     {
-        $resultCode = stream_socket_sendto($this->resource, $data);
+        $resultCode = fwrite($this->resource, $data);
         if ($resultCode === false) {
             throw new ClientException("Unable to write to stream");
         }
