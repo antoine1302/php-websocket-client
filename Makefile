@@ -1,4 +1,4 @@
-.PHONY: validate install update tests static phpcs phpcbf php82compatibility phpstan analyze clean
+.PHONY: validate install update tests static phpcs phpcbf php82compatibility phpstan analyze clean ci
 
 define header =
     @if [ -t 1 ]; then printf "\n\e[37m\e[100m  \e[104m $(1) \e[0m\n"; else printf "\n### $(1)\n"; fi
@@ -40,7 +40,7 @@ build/reports/phpstan:
 
 phpcs: vendor/bin/phpcs build/reports/phpcs build/cache/phpcs
 	$(call header,Run Code Sniffer)
-	@./vendor/bin/phpcs --cache=./build/cache/cs/cs.cache -p --report-full --report-checkstyle=./build/reports/cs/php-websocket-client.xml src/ tests/
+	@./vendor/bin/phpcs --cache=./build/cache/cs/cs.cache -p --report-full --report-checkstyle=./build/reports/cs/php-websocket-client.xml
 
 phpcbf: vendor/bin/phpcbf
 	$(call header,Fixing Code Style)

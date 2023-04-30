@@ -10,14 +10,13 @@ class ClientConfig implements ClientConfigInterface
     private const IS_PERSISTENT_DEFAULT = false;
 
     public function __construct(
-        private readonly string  $name,
-        private readonly string  $uri,
-        private readonly ?int    $connectionTimeout = null,
+        private readonly string $name,
+        private readonly string $uri,
+        private readonly ?int $connectionTimeout = null,
         private readonly ?string $origin = null,
-        private readonly ?bool   $isPersistent = null,
-        private readonly ?array  $additionalHeaders = null
-    )
-    {
+        private readonly ?bool $isPersistent = null,
+        private readonly ?array $additionalHeaders = null
+    ) {
     }
 
     public function getName(): string
