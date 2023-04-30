@@ -32,12 +32,12 @@ class Client implements LoggerAwareInterface
 
     public function __construct(
         private readonly ClientConfigInterface $clientConfig,
-        private readonly UriFactoryInterface   $uriFactory,
-        private readonly KeyGenerator          $keyGenerator,
-        private readonly HeadersValidator      $headersValidator,
-        private readonly HeadersBuilder        $headersBuilder,
-        private readonly Reader                $reader,
-        private readonly Writer                $writer
+        private readonly UriFactoryInterface $uriFactory,
+        private readonly KeyGenerator $keyGenerator,
+        private readonly HeadersValidator $headersValidator,
+        private readonly HeadersBuilder $headersBuilder,
+        private readonly Reader $reader,
+        private readonly Writer $writer
     ) {
     }
 
