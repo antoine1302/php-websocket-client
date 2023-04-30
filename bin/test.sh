@@ -11,7 +11,7 @@ case "$1" in
     static-analyze)
         make phpstan
         ;;
-    cs-fix)
+    static-fix)
         make phpcbf
         ;;
     unit)
@@ -20,8 +20,11 @@ case "$1" in
     testdox)
         make testdox
         ;;
+    php82-compatibility)
+        make php82compatibility
+        ;;
     *)
-        echo "Use $0 {static|cs-fix|unit|testdox|static-analyze} in order to run static or unit tests"
+        echo "Use $0 {static|static-fix|unit|testdox|static-analyze|php82-compatibility} in order to run static or unit tests"
         exit 1;
         ;;
 esac
