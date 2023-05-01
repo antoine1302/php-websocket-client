@@ -60,7 +60,7 @@ analyze: vendor/bin/phpstan build/reports/phpstan
 
 tests: vendor/bin/phpunit build/reports/phpunit
 	$(call header,Running Unit Tests)
-	@XDEBUG_MODE=coverage php -dzend_extension=xdebug.so ./vendor/bin/phpunit --coverage-clover=./build/reports/phpunit/clover.xml --log-junit=./build/reports/phpunit/unit.xml --coverage-php=./build/reports/phpunit/unit.cov --coverage-html=./build/reports/coverage/ --fail-on-warning
+	@XDEBUG_MODE=coverage ./vendor/bin/phpunit --fail-on-warning
 
 clean:
 	$(call header,Cleaning previous build)
