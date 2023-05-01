@@ -14,7 +14,7 @@ readonly class Frame
         private string $payload
     ) {
     }
-    
+
     public function isFinal(): bool
     {
         return $this->finBit;

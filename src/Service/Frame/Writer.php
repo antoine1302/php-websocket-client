@@ -43,7 +43,7 @@ class Writer
 
             $binaryData = pack($this->packFormat, ...$this->fragmentCollection);
             $binaryData .= $maskingKey ?? '';
-            $binaryData .= $this->buildPayload($frame, $maskingKey);;
+            $binaryData .= $this->buildPayload($frame, $maskingKey);
             $this->send($socket, $binaryData);
         }
     }

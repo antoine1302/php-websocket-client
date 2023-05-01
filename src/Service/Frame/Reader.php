@@ -29,7 +29,6 @@ readonly class Reader
         $fragmentList = [];
 
         foreach ($this->sequenceFactory->getSequence() as $fragment) {
-
             if (!$fragment instanceof FragmentAwareInterface) {
                 throw new WebSocketProtocolException("Fragment must implement FragmentAwareInterface");
             }
