@@ -3,7 +3,7 @@
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
          cacheDirectory="./build/cache/phpunit"
          cacheResult="true"
-        colors="true">
+         colors="true">
 
     <testsuites>
         <testsuite name="unit">
