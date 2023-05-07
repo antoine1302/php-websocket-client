@@ -4,11 +4,17 @@
 
 Basic implementation of PHP Websocket client that follow RFC6455
 
-## Tests
+## Installation
 
+If you wish to install it in your project, require it via composer:
+
+```bash
+composer require totoro1302/php-websocket-client
+```
+
+## Tests
 ### PHPUnit
 * Coverage must be 100% on `src/`
-
 ## Stack description
 ### PHP
 * PHP >= 8.2 is required
@@ -21,15 +27,25 @@ Basic implementation of PHP Websocket client that follow RFC6455
 
 ## Run test
 ### Run PHP unit tests
-`bin/test.sh unit`
+```bash
+bin/test.sh unit
+```
 ### Run code sniffer
-`bin/test.sh static`
+```bash
+bin/test.sh static
+```
 ### Run PHPStan static
-`bin/test.sh static-analyze`
+```bash
+bin/test.sh static-analyze
+```
 ### Run PHP 8.2 compatibility
-`bin/test.sh php82-compatibility`
+```bash
+bin/test.sh php82-compatibility
+```
 ### Run code smell fix
-`bin/test.sh static-fix`
+```bash
+bin/test.sh static-fix
+```
 
 ## Usage
 
