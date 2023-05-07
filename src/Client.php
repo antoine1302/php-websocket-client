@@ -115,7 +115,7 @@ class Client implements LoggerAwareInterface
         return $payload;
     }
 
-    public function push(string $payload, Opcode $opcode, bool $isMasked = true): void
+    public function push(string $payload, Opcode $opcode = Opcode::Text, bool $isMasked = true): void
     {
         if (strlen($payload) < PHP_INT_MAX) {
             $frameCollection = [new Frame(true, $opcode, $payload)];
