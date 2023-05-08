@@ -11,7 +11,7 @@ class OpcodeFragment implements FragmentAwareInterface, FragmentStorableAwareInt
 {
     public const BITMASK = 0x0F;
     private const KEY = 'opcode';
-    private Opcode $value;
+    private ?Opcode $value;
 
     public function load(string $binaryData): void
     {
