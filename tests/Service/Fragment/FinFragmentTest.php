@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Totoro1302\PhpWebsocketClient\Tests\Service\Fragment;
 
 use PHPUnit\Framework\TestCase;
