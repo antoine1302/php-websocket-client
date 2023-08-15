@@ -32,19 +32,18 @@ class Client implements LoggerAwareInterface
 
     public function __construct(
         private readonly ClientConfigInterface $clientConfig,
-        private readonly UriFactoryInterface   $uriFactory,
-        private readonly KeyGenerator          $keyGenerator,
-        private readonly HeadersValidator      $headersValidator,
-        private readonly HeadersBuilder        $headersBuilder,
-        private readonly Reader                $reader,
-        private readonly Writer                $writer
-    )
-    {
+        private readonly UriFactoryInterface $uriFactory,
+        private readonly KeyGenerator $keyGenerator,
+        private readonly HeadersValidator $headersValidator,
+        private readonly HeadersBuilder $headersBuilder,
+        private readonly Reader $reader,
+        private readonly Writer $writer
+    ) {
     }
 
     public function __destruct()
     {
-        $this->shutdownSocket();
+        $this->terminate();
     }
 
     public function connect(): void
@@ -79,7 +78,6 @@ class Client implements LoggerAwareInterface
         $payload = '';
 
         while ($this->isRunning()) {
-
             $frame = $this->reader->read($this->resource);
             $this->logger->info('Pull {opcode} frame', ['opcode' => $frame->getOpcode()->name]);
 
@@ -94,11 +92,8 @@ class Client implements LoggerAwareInterface
                     }
                     break;
                 case Opcode::Close:
-                    if ($this->currentState === self::STATE_CONNECTED) {
-                        $this->close($frame->getPayload());
-                    }
+                    $this->terminate($frame->getPayload());
                     $this->currentState = self::STATE_CLOSED;
-                    $this->shutdownSocket();
                     break;
                 case Opcode::Text:
                 case Opcode::Binary:
@@ -167,8 +162,7 @@ class Client implements LoggerAwareInterface
     {
         if ((time() - $this->lastCheckTs) > self::AWAIT_HEARTBEAT) {
             if ($this->currentState === self::STATE_TERMINATING) {
-                $this->requestTerminate();
-                $this->shutdownSocket();
+                $this->terminate();
                 $this->currentState = self::STATE_CLOSED;
             } else {
                 $this->ping(self::PING_DATA);
@@ -178,18 +172,13 @@ class Client implements LoggerAwareInterface
         }
     }
 
-    private function shutdownSocket(): void
+    private function terminate(?string $payload = null): void
     {
         if (is_resource($this->resource)) {
+            $this->close($payload ?? pack('n', CloseStatusCode::Normal->value));
             fclose($this->resource);
         }
         $this->logger->info('Socket closed successfully');
-    }
-
-    private function requestTerminate(): void
-    {
-        $this->currentState = self::STATE_TERMINATING;
-        $this->close(pack('n', CloseStatusCode::Normal->value));
     }
 
     private function open(UriInterface $uri, int $connectionTimeout): void
@@ -222,14 +211,17 @@ class Client implements LoggerAwareInterface
             ]);
             throw new ClientException("Unable to open stream socket connection");
         }
-        $this->logger->info('Successfully open socket connection to {connection_uri}', ['connection_uri' => $connectionUri]);
+        $this->logger->info(
+            'Successfully open socket connection to {connection_uri}',
+            ['connection_uri' => $connectionUri]
+        );
     }
 
     private function registerSignalHandler(): void
     {
-        pcntl_signal(SIGTERM, $this->requestTerminate(...));
-        pcntl_signal(SIGINT, $this->requestTerminate(...));
-        pcntl_signal(SIGQUIT, $this->requestTerminate(...));
+        pcntl_signal(SIGTERM, $this->terminate(...));
+        pcntl_signal(SIGINT, $this->terminate(...));
+        pcntl_signal(SIGQUIT, $this->terminate(...));
     }
 
     private function createConnectionUri(UriInterface $uri): string
