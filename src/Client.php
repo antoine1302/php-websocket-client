@@ -43,7 +43,10 @@ class Client implements LoggerAwareInterface
 
     public function __destruct()
     {
-        $this->terminate();
+        if (is_resource($this->resource)) {
+            fclose($this->resource);
+        }
+        $this->logger->info('Socket closed successfully');
     }
 
     public function connect(): void
@@ -92,7 +95,7 @@ class Client implements LoggerAwareInterface
                     }
                     break;
                 case Opcode::Close:
-                    $this->terminate($frame->getPayload());
+                    $this->close($frame->getPayload());
                     $this->currentState = self::STATE_CLOSED;
                     break;
                 case Opcode::Text:
@@ -162,7 +165,7 @@ class Client implements LoggerAwareInterface
     {
         if ((time() - $this->lastCheckTs) > self::AWAIT_HEARTBEAT) {
             if ($this->currentState === self::STATE_TERMINATING) {
-                $this->terminate();
+                $this->close(pack('n', CloseStatusCode::Normal->value));
                 $this->currentState = self::STATE_CLOSED;
             } else {
                 $this->ping(self::PING_DATA);
@@ -170,15 +173,6 @@ class Client implements LoggerAwareInterface
                 $this->lastCheckTs = time();
             }
         }
-    }
-
-    private function terminate(?string $payload = null): void
-    {
-        if (is_resource($this->resource)) {
-            $this->close($payload ?? pack('n', CloseStatusCode::Normal->value));
-            fclose($this->resource);
-        }
-        $this->logger->info('Socket closed successfully');
     }
 
     private function open(UriInterface $uri, int $connectionTimeout): void
@@ -219,16 +213,12 @@ class Client implements LoggerAwareInterface
 
     private function signalHandler(int $signal): void
     {
-        switch ($signal) {
-            case SIGTERM:
-            case SIGINT:
-            case SIGQUIT:
-                $this->terminate();
-                break;
-            default:
-                $this->logger->warning('Signal not identified', ['number' => $signal]);
-                $this->terminate();
-        }
+        $this->logger->debug('Signal handled', [
+            'signal' => $signal
+        ]);
+
+        $this->close(pack('n', CloseStatusCode::Normal->value));
+        $this->currentState = self::STATE_CLOSED;
     }
 
     private function registerSignalHandler(): void
