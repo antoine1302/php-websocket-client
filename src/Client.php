@@ -217,11 +217,25 @@ class Client implements LoggerAwareInterface
         );
     }
 
+    private function signalHandler(int $signal): void
+    {
+        switch ($signal) {
+            case SIGTERM:
+            case SIGINT:
+            case SIGQUIT:
+                $this->terminate();
+                break;
+            default:
+                $this->logger->warning('Signal not identified', ['number' => $signal]);
+                $this->terminate();
+        }
+    }
+
     private function registerSignalHandler(): void
     {
-        pcntl_signal(SIGTERM, $this->terminate(...));
-        pcntl_signal(SIGINT, $this->terminate(...));
-        pcntl_signal(SIGQUIT, $this->terminate(...));
+        pcntl_signal(SIGTERM, $this->signalHandler(...));
+        pcntl_signal(SIGINT, $this->signalHandler(...));
+        pcntl_signal(SIGQUIT, $this->signalHandler(...));
     }
 
     private function createConnectionUri(UriInterface $uri): string
