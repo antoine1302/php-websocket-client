@@ -6,7 +6,7 @@ namespace Totoro1302\PhpWebsocketClient\Service\Fragment;
 
 class FragmentSequenceFactory
 {
-    public function getSequence(): iterable
+    public function getSequence(): \Generator
     {
         $fin = new FinFragment();
         $opcode = new OpcodeFragment();
