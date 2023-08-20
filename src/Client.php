@@ -82,7 +82,7 @@ class Client implements LoggerAwareInterface
 
         while ($this->isRunning()) {
             $frame = $this->reader->read($this->resource);
-            $this->logger->info('Pull {opcode} frame', ['opcode' => $frame->getOpcode()->name]);
+            $this->logger->debug('Pulled {opcode} frame', ['opcode' => $frame->getOpcode()->name]);
 
             switch ($frame->getOpcode()) {
                 case Opcode::Ping:
@@ -134,7 +134,7 @@ class Client implements LoggerAwareInterface
         }
 
         $this->writer->write($this->resource, $frameCollection, $isMasked);
-        $this->logger->info('Push {opcode} frame', ['opcode' => $opcode->name]);
+        $this->logger->debug('Pushed {opcode} frame', ['opcode' => $opcode->name]);
     }
 
     public function ping(string $payload): void

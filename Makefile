@@ -1,4 +1,4 @@
-.PHONY: validate install update tests static phpcs phpcbf php82compatibility phpstan analyze clean ci
+.PHONY: validate install update tests phpcs phpcbf php81compatibility php82compatibility phpstan analyze clean ci
 
 define header =
     @if [ -t 1 ]; then printf "\n\e[37m\e[100m  \e[104m $(1) \e[0m\n"; else printf "\n### $(1)\n"; fi
@@ -46,6 +46,10 @@ phpcbf: vendor/bin/phpcbf
 	$(call header,Fixing Code Style)
 	@./vendor/bin/phpcbf --standard=./ci/phpcs/ruleset.xml src/ tests/
 
+php81compatibility: vendor/bin/phpstan build/reports/phpstan
+	$(call header,Checking PHP 8.1 compatibility)
+	@./vendor/bin/phpstan analyse --configuration=./phpstan-compatibility81.neon.dist --error-format=checkstyle > ./build/reports/phpstan/php81-compatibility.xml
+
 php82compatibility: vendor/bin/phpstan build/reports/phpstan
 	$(call header,Checking PHP 8.2 compatibility)
 	@./vendor/bin/phpstan analyse --configuration=./phpstan-compatibility82.neon.dist --error-format=checkstyle > ./build/reports/phpstan/php82-compatibility.xml
@@ -66,4 +70,4 @@ clean:
 	$(call header,Cleaning previous build)
 	@if [ "$(shell ls -A ./build)" ]; then rm -rf ./build/*; fi; echo " done"
 
-ci: clean validate phpcs phpstan tests php82compatibility
+ci: clean validate phpcs phpstan tests php81compatibility php82compatibility
