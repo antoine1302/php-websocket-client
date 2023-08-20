@@ -18,12 +18,12 @@ jobs:
         env:
           fail-fast: true
       - name: Cleaning previous build...
-        run: ./make clean
+        run: make clean
       - name: Installing ${{ github.repository }}...
-        run: ./make install
+        run: make install
       - name: Checking Code Style
-        run: ./make phpcs
+        run: make phpcs
       - name: Running Static Analyze
-        run: /.make phpstan
+        run: make phpstan
       - name: Running Unit Tests
-        run: ./make tests
+        run: make tests
