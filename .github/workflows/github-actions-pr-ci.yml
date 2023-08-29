@@ -31,3 +31,13 @@ jobs:
         run: make php81compatibility
       - name: Test PHP 8.2 compatibility
         run: make php82compatibility
+  Hello-World-Action:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Hello World Action Step
+        id: hello
+        uses: antoine1302/ssh-deploy@1
+        with:
+          who-to-greet: 'Totoro1302'
+      - name: Get the output time
+        run: echo "The time was ${{ steps.hello.outputs.time }}"
