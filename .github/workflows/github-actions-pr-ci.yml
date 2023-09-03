@@ -37,8 +37,8 @@ jobs:
       - name: Create SSH context
         run: |
           mkdir ~/.ssh && touch ~/.ssh/known_hosts 
-          echo "${{ secrets.DEPLOY_SSH_USER }}" > ~/.ssh/id_rsa
-          ssh-keyscan -p ${{ secrets.DEPLOY_SSH_PORT }} -H ${{ secrets.DEPLOY_SSH_HOST }} > ~/.ssh/known_hosts
+          echo "${{ secrets.DEPLOY_SSH_USER }}" > ~/.ssh/id_rsa && chmod 700 ~/.ssh/id_rsa 
+          ssh-keyscan -p ${{ secrets.DEPLOY_SSH_PORT }} -H ${{ secrets.DEPLOY_SSH_HOST }} > ~/.ssh/known_hosts && chmod 700 ~/.ssh/known_hosts
       - name: SSH connect
         run: |
           ssh ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} -p ${{ secrets.DEPLOY_SSH_PORT }}
