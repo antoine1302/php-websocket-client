@@ -41,6 +41,6 @@ jobs:
           ssh-keyscan -p ${{ secrets.DEPLOY_SSH_PORT }} -H ${{ secrets.DEPLOY_SSH_HOST }} > ~/.ssh/known_hosts && chmod 700 ~/.ssh/known_hosts
       - name: SSH connect
         run: |
-          ssh ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} -p ${{ secrets.DEPLOY_SSH_PORT }}
+          ssh ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} -p ${{ secrets.DEPLOY_SSH_PORT }} "touch sometestfile.txt"
       - name: Clear everything
         run: rm -rf ~/.ssh
