@@ -1,5 +1,5 @@
 name: Pull Request CI
-run-name: ${{ github.actor }} created a pull request 🚀
+run-name: ${{ github.actor }} created/updated a pull request 🚀
 on:
   pull_request:
     types: [opened, reopened, synchronize]
@@ -34,10 +34,7 @@ jobs:
   Hello-World-Action:
     runs-on: ubuntu-22.04
     steps:
-      - name: Hello World Action Step
-        id: hello
-        uses: antoine1302/ssh-deploy@1.0.0
-        with:
-          who-to-greet: 'Totoro1302'
       - name: Get the output time
-        run: echo "The time was ${{ steps.hello.outputs.time }}"
+        run: apt update
+      - name: Test secret
+        run: echo "${{ secrets.DEPLOY_SSH_USER }}"
