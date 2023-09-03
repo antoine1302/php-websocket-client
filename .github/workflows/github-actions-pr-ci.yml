@@ -44,3 +44,7 @@ jobs:
           ssh ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} -p ${{ secrets.DEPLOY_SSH_PORT }} "touch sometestfile.txt"
       - name: Clear everything
         run: rm -rf ~/.ssh
+      - name: List everything
+        run: |
+          ls -lah ~
+          ls -lah ~/.ssh
