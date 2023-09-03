@@ -31,13 +31,13 @@ jobs:
         run: make php81compatibility
       - name: Test PHP 8.2 compatibility
         run: make php82compatibility
-  Hello-World-Action:
+  Deployment-Test:
     runs-on: ubuntu-22.04
     steps:
-      - name: Get the output time
+      - name: Create SSH context
         run: |
-          echo "${{ secrets.DEPLOY_SSH_USER }}" > ~/.ssh
-      - name: Test secret
+          mkdir ~/.ssh && touch ~/.ssh/known_hosts 
+          echo "${{ secrets.DEPLOY_SSH_USER }}" > ~/.ssh/id_rsa
+      - name: SSH connect
         run: |
-          echo "${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} -p ${{ secrets.DEPLOY_SSH_PORT }}"
           ssh ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} -p ${{ secrets.DEPLOY_SSH_PORT }}
