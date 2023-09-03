@@ -36,7 +36,7 @@ jobs:
     steps:
       - name: Get the output time
         run: |
-          cat ${{ secrets.DEPLOY_SSH_USER }} > ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_USER }}" > ~/.ssh
       - name: Test secret
         run: |
           echo "${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} -p ${{ secrets.DEPLOY_SSH_PORT }}"
