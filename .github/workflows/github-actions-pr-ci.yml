@@ -37,6 +37,8 @@ jobs:
       - name: Some preparation
         run: ssh-add - <<< "${{ secrets.DEPLOY_SSH_KEY }}"
       - name: Get the output time
-        run: ssh ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} -p ${{ secrets.DEPLOY_SSH_PORT }}
+        run: |
+          whoami
+          ssh ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} -p ${{ secrets.DEPLOY_SSH_PORT }}
       - name: Test secret
         run: echo "${{ secrets.DEPLOY_SSH_USER }}"
