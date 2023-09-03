@@ -34,8 +34,6 @@ jobs:
   Hello-World-Action:
     runs-on: ubuntu-22.04
     steps:
-      - name: Some preparation
-        run: ssh-add - <<< "${{ secrets.DEPLOY_SSH_KEY }}"
       - name: Get the output time
         run: |
           whoami
