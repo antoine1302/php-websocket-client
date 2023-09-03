@@ -31,20 +31,3 @@ jobs:
         run: make php81compatibility
       - name: Test PHP 8.2 compatibility
         run: make php82compatibility
-  Deployment-Test:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Create SSH context
-        run: |
-          mkdir ~/.ssh && touch ~/.ssh/known_hosts 
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_rsa && chmod 700 ~/.ssh/id_rsa 
-          ssh-keyscan -p ${{ secrets.DEPLOY_SSH_PORT }} -H ${{ secrets.DEPLOY_SSH_HOST }} > ~/.ssh/known_hosts && chmod 700 ~/.ssh/known_hosts
-      - name: SSH connect
-        run: |
-          ssh ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} -p ${{ secrets.DEPLOY_SSH_PORT }} "touch sometestfile.txt"
-      - name: Clear everything
-        run: rm -rf ~/.ssh
-      - name: List everything
-        run: |
-          ls -lah ~
-          ls -lah ~/.ssh
