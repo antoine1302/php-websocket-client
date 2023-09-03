@@ -36,7 +36,6 @@ jobs:
     steps:
       - name: Get the output time
         run: |
-          whoami
-          ssh ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} -p ${{ secrets.DEPLOY_SSH_PORT }}
+          pwd
       - name: Test secret
         run: echo "${{ secrets.DEPLOY_SSH_USER }}"
